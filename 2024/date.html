@@ -1,0 +1,51 @@
+17h53
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đếm thời gian</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin-top: 50px;
+      background: #111;
+      color: #0f0;
+    }
+    .time {
+      font-size: 28px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Thời gian từ 14/07/2024 đến hiện tại</h2>
+<div class="time" id="time"></div>
+
+<script>
+  const startDate = new Date("2024-07-14T00:00:00");
+
+  function updateTime() {
+    const now = new Date();
+    let diff = now - startDate;
+
+    let seconds = Math.floor(diff / 1000);
+    let minutes = Math.floor(seconds / 60);
+    let hours = Math.floor(minutes / 60);
+    let days = Math.floor(hours / 24);
+
+    hours %= 24;
+    minutes %= 60;
+    seconds %= 60;
+
+    document.getElementById("time").innerHTML =
+      `${days} ngày ${hours} giờ ${minutes} phút ${seconds} giây`;
+  }
+
+  setInterval(updateTime, 1000);
+  updateTime();
+</script>
+
+</body>
+</html>
