@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CRUD Giờ Trực • Mobile First</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    
+    :root {
+      --tw-color-primary: #00d4ff;
+    }
+    
+    body {
+      font-family: 'Inter', system_ui, sans-serif;
+    }
+    
+    .table-container {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    
+    .mobile-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .total-card {
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+    }
+  </style>
+</head>
+<body class="bg-gray-950 text-white min-h-screen pb-8">
+  <!-- HEADER -->
+  <div class="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-clock text-3xl text-cyan-400"></i>
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight">Giờ Trực</h1>
+          <p class="text-xs text-gray-400 -mt-1">Node: gio-truc</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="loadData()" 
+                class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-2xl text-sm font-medium transition">
+          <i class="fa-solid fa-rotate"></i>
+          <span class="hidden sm:inline">Làm mới</span>
+        </button>
+        <a href="https://khoanchitrongngay-default-rtdb.asia-southeast1.firebasedatabase.app/gio-truc.json" 
+           target="_blank"
+           class="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-2xl flex items-center gap-1">
+          <i class="fa-solid fa-database"></i>
+          <span class="hidden sm:inline">Xem JSON</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 pt-6">
+    
+    <!-- TOTAL CARD -->
+    <div id="totalCard" class="total-card rounded-3xl p-6 mb-8 text-center shadow-2xl">
+      <div class="flex justify-between items-center">
+        <div class="text-cyan-100 text-sm font-medium tracking-widest">TỔNG THỜI GIAN TRỰC</div>
+        <div id="totalHours" class="text-6xl font-bold text-white">0</div>
+      </div>
+      <div class="text-cyan-200 text-2xl font-light mt-1">giờ</div>
+      <div id="totalEntries" class="text-xs text-cyan-100 mt-4 opacity-75"></div>
+    </div>
+
+    <!-- FORM -->
+    <div class="bg-gray-900 rounded-3xl p-6 mb-8 shadow-xl">
+      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i>
+        <span id="formTitle">Thêm mới giờ trực</span>
+      </h2>
+      
+      <input type="hidden" id="editKey">
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Ngày</label>
+          <input type="date" id="ngay" 
+                 class="w-full bg-gray-800 border border-gray-700 focus:border-cyan-400 rounded-2xl px-5 py-4 text-white text-lg outline-none">
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Số giờ</label>
+          <div class="relative">
+            <input type="number" id="so_gio" min="0" step="1" 
+                   class="w-full bg-gray-800 border border-gray-700 focus:border-cyan-400 rounded-2xl px-5 py-4 text-white text-lg outline-none">
+            <span class="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 text-xl">giờ</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-8">
+        <button onclick="saveData()" 
+                class="flex-1 bg-cyan-400 hover:bg-cyan-300 active:scale-95 transition text-black font-semibold text-xl py-4 rounded-3xl flex items-center justify-center gap-2">
+          <i class="fa-solid fa-save"></i>
+          <span id="saveBtnText">LƯU DỮ LIỆU</span>
+        </button>
+        
+        <button onclick="clearForm()" 
+                class="px-8 bg-gray-800 hover:bg-gray-700 active:scale-95 transition text-white font-medium rounded-3xl">
+          <i class="fa-solid fa-eraser"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- TABLE / LIST -->
+    <div class="flex justify-between items-baseline mb-4 px-1">
+      <h2 class="text-xl font-semibold">Danh sách giờ trực</h2>
+      <div id="lastUpdated" class="text-xs text-gray-400"></div>
+    </div>
+
+    <div class="bg-gray-900 rounded-3xl overflow-hidden shadow-xl">
+      <div class="table-container">
+        <table class="w-full min-w-full">
+          <thead class="bg-gray-800 sticky top-0">
+            <tr class="text-left text-gray-400 text-sm">
+              <th class="px-6 py-5 font-medium">Ngày</th>
+              <th class="px-6 py-5 font-medium text-right">Số giờ</th>
+              <th class="px-6 py-5 font-medium hidden sm:table-cell">Thời gian tạo</th>
+              <th class="px-6 py-5 w-24"></th>
+            </tr>
+          </thead>
+          <tbody id="dataBody" class="divide-y divide-gray-800 text-base"></tbody>
+        </table>
+      </div>
+      
+      <!-- Mobile Card Fallback (ẩn trên desktop) -->
+      <div id="mobileCards" class="sm:hidden p-4 space-y-4"></div>
+    </div>
+  </div>
+
+  <script>
+    const DB_URL = "https://khoanchitrongngay-default-rtdb.asia-southeast1.firebasedatabase.app/gio-truc.json";
+
+    let currentData = {};
+
+    // Tailwind script init
+    function initTailwind() {
+      // Tailwind already loaded via CDN
+    }
+
+    // Load data
+    async function loadData() {
+      try {
+        const res = await fetch(DB_URL);
+        const data = await res.json();
+        currentData = data || {};
+        
+        renderTotal();
+        renderList();
+        
+        // Cập nhật thời gian load
+        document.getElementById("lastUpdated").innerHTML = `
+          <i class="fa-solid fa-clock"></i> 
+          Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})}
+        `;
+      } catch (err) {
+        showToast("Lỗi tải dữ liệu: " + err.message, "error");
+      }
+    }
+
+    // Tính tổng và hiển thị
+    function renderTotal() {
+      let totalHours = 0;
+      let count = 0;
+
+      Object.values(currentData).forEach(item => {
+        totalHours += parseFloat(item.so_gio) || 0;
+        count++;
+      });
+
+      // Hiển thị trên card tổng
+      document.getElementById("totalHours").textContent = totalHours.toLocaleString('vi-VN');
+      document.getElementById("totalEntries").innerHTML = `
+        ${count} mục • Trung bình <span class="font-semibold">${count ? (totalHours / count).toFixed(1) : 0}</span> giờ/ngày
+      `;
+    }
+
+    // Render danh sách (table trên desktop + card trên mobile)
+    function renderList() {
+      const tbody = document.getElementById("dataBody");
+      const mobileContainer = document.getElementById("mobileCards");
+      
+      tbody.innerHTML = "";
+      mobileContainer.innerHTML = "";
+
+      if (Object.keys(currentData).length === 0) {
+        const emptyHTML = `
+          <tr><td colspan="4" class="text-center py-12 text-gray-400">
+            <i class="fa-solid fa-inbox text-5xl mb-4 block"></i>
+            Chưa có dữ liệu giờ trực nào
+          </td></tr>`;
+        tbody.innerHTML = emptyHTML;
+        mobileContainer.innerHTML = `<div class="text-center py-12 text-gray-400">Chưa có dữ liệu</div>`;
+        return;
+      }
+
+      Object.keys(currentData).forEach(key => {
+        const item = currentData[key];
+        const dateObj = item.timestamp ? new Date(item.timestamp) : null;
+        
+        // Desktop Table Row
+        const row = document.createElement("tr");
+        row.className = "hover:bg-gray-800/50 transition";
+        row.innerHTML = `
+          <td class="px-6 py-5 font-medium">${item.ngay || '—'}</td>
+          <td class="px-6 py-5 text-right font-semibold text-2xl text-cyan-400">${item.so_gio || 0}</td>
+          <td class="px-6 py-5 text-sm text-gray-400 hidden sm:table-cell">
+            ${dateObj ? dateObj.toLocaleString('vi-VN') : '—'}
+          </td>
+          <td class="px-6 py-5">
+            <div class="flex gap-2">
+              <button onclick="editItem('${key}')" 
+                      class="text-amber-400 hover:text-amber-300 px-3 py-2">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button onclick="deleteItem('${key}')" 
+                      class="text-red-400 hover:text-red-300 px-3 py-2">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+
+        // Mobile Card
+        const cardHTML = `
+          <div class="mobile-card bg-gray-800 rounded-3xl p-5">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="text-cyan-400 text-sm">${item.ngay || '—'}</div>
+                <div class="text-4xl font-bold text-cyan-300 mt-1">${item.so_gio || 0} <span class="text-xl font-normal text-gray-400">giờ</span></div>
+              </div>
+              <div class="text-right text-xs text-gray-400">
+                ${dateObj ? dateObj.toLocaleDateString('vi-VN') + '<br>' + dateObj.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) : ''}
+              </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+              <button onclick="editItem('${key}')" 
+                      class="flex-1 bg-amber-400 text-black py-3 rounded-2xl font-medium flex items-center justify-center gap-2">
+                <i class="fa-solid fa-pen"></i> SỬA
+              </button>
+              <button onclick="deleteItem('${key}')" 
+                      class="flex-1 bg-red-500/90 hover:bg-red-500 text-white py-3 rounded-2xl font-medium flex items-center justify-center gap-2">
+                <i class="fa-solid fa-trash"></i> XÓA
+              </button>
+            </div>
+          </div>`;
+        mobileContainer.innerHTML += cardHTML;
+      });
+    }
+
+    async function saveData() {
+      const key = document.getElementById("editKey").value;
+      const ngay = document.getElementById("ngay").value;
+      const so_gio = parseFloat(document.getElementById("so_gio").value);
+
+      if (!ngay || isNaN(so_gio)) {
+        showToast("Vui lòng nhập đầy đủ ngày và số giờ!", "error");
+        return;
+      }
+
+      const payload = {
+        ngay: ngay,
+        so_gio: so_gio,
+        timestamp: Date.now()
+      };
+
+      const baseURL = "https://khoanchitrongngay-default-rtdb.asia-southeast1.firebasedatabase.app/gio-truc";
+
+      try {
+        if (key) {
+          // UPDATE
+          await fetch(`${baseURL}/${key}.json`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          showToast("✅ Đã cập nhật thành công!", "success");
+        } else {
+          // CREATE
+          await fetch(`${baseURL}.json`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          showToast("✅ Đã thêm mới thành công!", "success");
+        }
+
+        clearForm();
+        await loadData(); // reload
+      } catch (err) {
+        showToast("Lỗi: " + err.message, "error");
+      }
+    }
+
+    function editItem(key) {
+      const item = currentData[key];
+      if (!item) return;
+
+      document.getElementById("editKey").value = key;
+      document.getElementById("ngay").value = item.ngay || "";
+      document.getElementById("so_gio").value = item.so_gio || 0;
+      
+      document.getElementById("formTitle").innerHTML = `
+        <i class="fa-solid fa-pen"></i> 
+        Chỉnh sửa mục
+      `;
+      document.getElementById("saveBtnText").innerHTML = `
+        <i class="fa-solid fa-save"></i> CẬP NHẬT
+      `;
+      
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function deleteItem(key) {
+      if (!confirm("XÓA mục này?\nKhông thể khôi phục!")) return;
+
+      try {
+        await fetch(`https://khoanchitrongngay-default-rtdb.asia-southeast1.firebasedatabase.app/gio-truc/${key}.json`, {
+          method: "DELETE"
+        });
+        showToast("🗑️ Đã xóa thành công!", "success");
+        await loadData();
+      } catch (err) {
+        showToast("Lỗi khi xóa: " + err.message, "error");
+      }
+    }
+
+    function clearForm() {
+      document.getElementById("editKey").value = "";
+      document.getElementById("ngay").value = "";
+      document.getElementById("so_gio").value = "";
+      
+      document.getElementById("formTitle").innerHTML = `
+        <i class="fa-solid fa-plus"></i> 
+        Thêm mới giờ trực
+      `;
+      document.getElementById("saveBtnText").innerHTML = `
+        <i class="fa-solid fa-save"></i> LƯU DỮ LIỆU
+      `;
+    }
+
+    function showToast(message, type) {
+      const toast = document.createElement("div");
+      toast.style.cssText = `
+        position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+        padding:16px 24px; border-radius:9999px; color:white; font-weight:500;
+        display:flex; align-items:center; gap:10px; box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.3);
+        z-index:9999;
+      `;
+      toast.className = type === "success" 
+        ? "bg-green-500" 
+        : "bg-red-500";
+      
+      toast.innerHTML = `
+        <i class="fa-solid ${type === "success" ? "fa-check-circle" : "fa-circle-exclamation"}"></i>
+        ${message}
+      `;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.transition = "all 0.3s";
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(-50%) translateY(20px)";
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Khởi chạy
+    window.onload = () => {
+      initTailwind();
+      loadData();
+      
+      // Auto refresh mỗi 30 giây
+      setInterval(() => {
+        if (document.visibilityState === "visible") loadData();
+      }, 30000);
+    };
+  </script>
+</body>
+</html>
