@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sơ Đồ Thiết Kế Mạng Blockchain</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cyan: #00f5ff;
+    --green: #00ff88;
+    --orange: #ff6b35;
+    --purple: #b44fff;
+    --yellow: #ffd700;
+    --dark: #030b14;
+    --dark2: #071525;
+    --dark3: #0a1f35;
+    --grid: rgba(0,245,255,0.05);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: #e0f0ff;
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative; z-index: 1;
+    padding: 40px 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  header h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--cyan), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    margin-bottom: 8px;
+  }
+  header p {
+    font-family: 'Share Tech Mono', monospace;
+    color: rgba(0,245,255,0.5);
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+  }
+
+  /* DIAGRAM WRAPPER */
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  /* LAYER */
+  .layer {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    position: relative;
+    margin-bottom: 0;
+  }
+
+  .layer-label {
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 20px 12px;
+    width: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 2px solid;
+    flex-shrink: 0;
+  }
+
+  .layer-content {
+    flex: 1;
+    padding: 20px 18px;
+    border: 1px solid;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* LAYER COLORS */
+  .layer-1 .layer-label { color: var(--cyan); border-color: var(--cyan); background: rgba(0,245,255,0.05); }
+  .layer-1 .layer-content { border-color: rgba(0,245,255,0.25); background: linear-gradient(135deg, rgba(0,245,255,0.04), rgba(0,245,255,0.01)); }
+
+  .layer-2 .layer-label { color: var(--green); border-color: var(--green); background: rgba(0,255,136,0.05); }
+  .layer-2 .layer-content { border-color: rgba(0,255,136,0.25); background: linear-gradient(135deg, rgba(0,255,136,0.04), rgba(0,255,136,0.01)); }
+
+  .layer-3 .layer-label { color: var(--purple); border-color: var(--purple); background: rgba(180,79,255,0.05); }
+  .layer-3 .layer-content { border-color: rgba(180,79,255,0.25); background: linear-gradient(135deg, rgba(180,79,255,0.04), rgba(180,79,255,0.01)); }
+
+  .layer-4 .layer-label { color: var(--orange); border-color: var(--orange); background: rgba(255,107,53,0.05); }
+  .layer-4 .layer-content { border-color: rgba(255,107,53,0.25); background: linear-gradient(135deg, rgba(255,107,53,0.04), rgba(255,107,53,0.01)); }
+
+  .layer-5 .layer-label { color: var(--yellow); border-color: var(--yellow); background: rgba(255,215,0,0.05); }
+  .layer-5 .layer-content { border-color: rgba(255,215,0,0.25); background: linear-gradient(135deg, rgba(255,215,0,0.04), rgba(255,215,0,0.01)); }
+
+  .layer-6 .layer-label { color: #ff4d88; border-color: #ff4d88; background: rgba(255,77,136,0.05); }
+  .layer-6 .layer-content { border-color: rgba(255,77,136,0.25); background: linear-gradient(135deg, rgba(255,77,136,0.04), rgba(255,77,136,0.01)); }
+
+  /* CONNECTOR ARROW */
+  .arrow-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 36px;
+    position: relative;
+    z-index: 2;
+  }
+  .arrow-row::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: 0;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,245,255,0.3), rgba(0,245,255,0.6));
+  }
+  .arrow-down {
+    width: 0; height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 14px solid rgba(0,245,255,0.7);
+    filter: drop-shadow(0 0 6px var(--cyan));
+    position: relative; z-index: 3;
+    margin-top: 22px;
+  }
+
+  /* NODE CARDS */
+  .node {
+    border: 1px solid;
+    padding: 10px 16px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 130px;
+    max-width: 200px;
+    flex: 1;
+    position: relative;
+    cursor: default;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background: var(--dark2);
+  }
+  .node:hover {
+    transform: translateY(-3px);
+    z-index: 10;
+  }
+
+  .node-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+  .node-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .node-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    opacity: 0.6;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* NODE COLORS */
+  .node-cyan { border-color: rgba(0,245,255,0.5); color: var(--cyan); box-shadow: 0 0 12px rgba(0,245,255,0.1); }
+  .node-cyan:hover { box-shadow: 0 0 24px rgba(0,245,255,0.3); }
+  .node-cyan .node-title { color: var(--cyan); }
+
+  .node-green { border-color: rgba(0,255,136,0.5); color: var(--green); box-shadow: 0 0 12px rgba(0,255,136,0.1); }
+  .node-green:hover { box-shadow: 0 0 24px rgba(0,255,136,0.3); }
+  .node-green .node-title { color: var(--green); }
+
+  .node-purple { border-color: rgba(180,79,255,0.5); color: var(--purple); box-shadow: 0 0 12px rgba(180,79,255,0.1); }
+  .node-purple:hover { box-shadow: 0 0 24px rgba(180,79,255,0.3); }
+  .node-purple .node-title { color: var(--purple); }
+
+  .node-orange { border-color: rgba(255,107,53,0.5); color: var(--orange); box-shadow: 0 0 12px rgba(255,107,53,0.1); }
+  .node-orange:hover { box-shadow: 0 0 24px rgba(255,107,53,0.3); }
+  .node-orange .node-title { color: var(--orange); }
+
+  .node-yellow { border-color: rgba(255,215,0,0.5); color: var(--yellow); box-shadow: 0 0 12px rgba(255,215,0,0.1); }
+  .node-yellow:hover { box-shadow: 0 0 24px rgba(255,215,0,0.3); }
+  .node-yellow .node-title { color: var(--yellow); }
+
+  .node-pink { border-color: rgba(255,77,136,0.5); color: #ff4d88; box-shadow: 0 0 12px rgba(255,77,136,0.1); }
+  .node-pink:hover { box-shadow: 0 0 24px rgba(255,77,136,0.3); }
+  .node-pink .node-title { color: #ff4d88; }
+
+  /* SECTION TITLE inside layer */
+  .section-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    opacity: 0.5;
+    text-transform: uppercase;
+    width: 100%;
+    text-align: center;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed rgba(255,255,255,0.1);
+    margin-bottom: 4px;
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 40px;
+    padding: 20px;
+    border: 1px solid rgba(0,245,255,0.1);
+    background: rgba(0,10,20,0.5);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    opacity: 0.8;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* FLOW LABEL */
+  .flow-badge {
+    position: absolute;
+    right: 16px; top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    opacity: 0.4;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  /* GLOW SCANLINE EFFECT */
+  @keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+  .scanline {
+    position: fixed;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0,245,255,0.08), transparent);
+    animation: scan 6s linear infinite;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+  .node { animation: pulse 3s ease-in-out infinite; }
+  .node:nth-child(2) { animation-delay: 0.4s; }
+  .node:nth-child(3) { animation-delay: 0.8s; }
+  .node:nth-child(4) { animation-delay: 1.2s; }
+  .node:nth-child(5) { animation-delay: 1.6s; }
+  .node:hover { animation: none; opacity: 1; }
+
+  /* SPECIAL: center node */
+  .node-core {
+    border-width: 2px;
+    box-shadow: 0 0 30px rgba(0,245,255,0.3), inset 0 0 20px rgba(0,245,255,0.05);
+    min-width: 160px;
+  }
+
+  @media (max-width: 700px) {
+    .layer-label { font-size: 0.5rem; padding: 14px 8px; width: 34px; min-width: 34px; }
+    .node { min-width: 90px; padding: 8px 10px; }
+    .node-icon { font-size: 1.2rem; }
+    .node-title { font-size: 0.58rem; }
+    .node-sub { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<div class="page">
+  <header>
+    <h1>⬡ Kiến Trúc Mạng Blockchain</h1>
+    <p>// CHUẨN THIẾT KẾ — BLOCKCHAIN NETWORK ARCHITECTURE v2.0 //</p>
+  </header>
+
+  <div class="diagram">
+
+    <!-- LAYER 1: APPLICATION -->
+    <div class="layer layer-1">
+      <div class="layer-label">Tầng Ứng Dụng</div>
+      <div class="layer-content">
+        <div class="section-title">APPLICATION LAYER — Giao diện người dùng & ứng dụng</div>
+        <div class="node node-cyan">
+          <div class="node-icon">🌐</div>
+          <div class="node-title">DApp / Web3</div>
+          <div class="node-sub">Frontend · Wallet UI</div>
+        </div>
+        <div class="node node-cyan">
+          <div class="node-icon">📱</div>
+          <div class="node-title">Mobile App</div>
+          <div class="node-sub">iOS · Android</div>
+        </div>
+        <div class="node node-cyan">
+          <div class="node-icon">🔌</div>
+          <div class="node-title">REST / RPC API</div>
+          <div class="node-sub">JSON-RPC · GraphQL</div>
+        </div>
+        <div class="node node-cyan">
+          <div class="node-icon">📊</div>
+          <div class="node-title">Block Explorer</div>
+          <div class="node-sub">Etherscan · Analytics</div>
+        </div>
+        <div class="flow-badge">USER INTERFACE</div>
+      </div>
+    </div>
+
+    <div class="arrow-row"><div class="arrow-down"></div></div>
+
+    <!-- LAYER 2: SMART CONTRACT -->
+    <div class="layer layer-2">
+      <div class="layer-label">Smart Contract</div>
+      <div class="layer-content">
+        <div class="section-title">SMART CONTRACT LAYER — Logic nghiệp vụ phi tập trung</div>
+        <div class="node node-green">
+          <div class="node-icon">📜</div>
+          <div class="node-title">ERC-20 Token</div>
+          <div class="node-sub">Fungible Token</div>
+        </div>
+        <div class="node node-green">
+          <div class="node-icon">🖼️</div>
+          <div class="node-title">ERC-721 NFT</div>
+          <div class="node-sub">Non-Fungible Token</div>
+        </div>
+        <div class="node node-green">
+          <div class="node-icon">🏛️</div>
+          <div class="node-title">DAO Gov.</div>
+          <div class="node-sub">Governance · Voting</div>
+        </div>
+        <div class="node node-green">
+          <div class="node-icon">💱</div>
+          <div class="node-title">DeFi Protocol</div>
+          <div class="node-sub">AMM · Lending · DEX</div>
+        </div>
+        <div class="node node-green">
+          <div class="node-icon">🔮</div>
+          <div class="node-title">Oracle</div>
+          <div class="node-sub">Chainlink · Data Feed</div>
+        </div>
+        <div class="flow-badge">SOLIDITY / RUST</div>
+      </div>
+    </div>
+
+    <div class="arrow-row"><div class="arrow-down"></div></div>
+
+    <!-- LAYER 3: CONSENSUS -->
+    <div class="layer layer-3">
+      <div class="layer-label">Đồng Thuận</div>
+      <div class="layer-content">
+        <div class="section-title">CONSENSUS LAYER — Cơ chế đồng thuận mạng lưới</div>
+        <div class="node node-purple node-core">
+          <div class="node-icon">⚡</div>
+          <div class="node-title">Proof of Stake</div>
+          <div class="node-sub">PoS · Validators · Slashing</div>
+        </div>
+        <div class="node node-purple">
+          <div class="node-icon">⛏️</div>
+          <div class="node-title">Proof of Work</div>
+          <div class="node-sub">PoW · Mining · Hash</div>
+        </div>
+        <div class="node node-purple">
+          <div class="node-icon">🗳️</div>
+          <div class="node-title">BFT / PBFT</div>
+          <div class="node-sub">Byzantine Fault Tolerant</div>
+        </div>
+        <div class="node node-purple">
+          <div class="node-icon">🔄</div>
+          <div class="node-title">DPoS</div>
+          <div class="node-sub">Delegated PoS</div>
+        </div>
+        <div class="flow-badge">FINALITY · SECURITY</div>
+      </div>
+    </div>
+
+    <div class="arrow-row"><div class="arrow-down"></div></div>
+
+    <!-- LAYER 4: NETWORK P2P -->
+    <div class="layer layer-4">
+      <div class="layer-label">Mạng P2P</div>
+      <div class="layer-content">
+        <div class="section-title">NETWORK LAYER — Giao tiếp ngang hàng phi tập trung</div>
+        <div class="node node-orange">
+          <div class="node-icon">🖥️</div>
+          <div class="node-title">Full Node</div>
+          <div class="node-sub">Lưu toàn bộ blockchain</div>
+        </div>
+        <div class="node node-orange">
+          <div class="node-icon">✅</div>
+          <div class="node-title">Validator Node</div>
+          <div class="node-sub">Xác nhận giao dịch</div>
+        </div>
+        <div class="node node-orange">
+          <div class="node-icon">🌿</div>
+          <div class="node-title">Light Node</div>
+          <div class="node-sub">SPV · Headers only</div>
+        </div>
+        <div class="node node-orange">
+          <div class="node-icon">🔗</div>
+          <div class="node-title">P2P Protocol</div>
+          <div class="node-sub">libp2p · Gossip</div>
+        </div>
+        <div class="node node-orange">
+          <div class="node-icon">🌉</div>
+          <div class="node-title">Bridge Node</div>
+          <div class="node-sub">Cross-chain relay</div>
+        </div>
+        <div class="flow-badge">TCP/IP · UDP</div>
+      </div>
+    </div>
+
+    <div class="arrow-row"><div class="arrow-down"></div></div>
+
+    <!-- LAYER 5: DATA -->
+    <div class="layer layer-5">
+      <div class="layer-label">Dữ Liệu</div>
+      <div class="layer-content">
+        <div class="section-title">DATA LAYER — Lưu trữ & cấu trúc dữ liệu blockchain</div>
+        <div class="node node-yellow">
+          <div class="node-icon">⬡</div>
+          <div class="node-title">Block Header</div>
+          <div class="node-sub">Hash · Nonce · Timestamp</div>
+        </div>
+        <div class="node node-yellow">
+          <div class="node-icon">🌳</div>
+          <div class="node-title">Merkle Tree</div>
+          <div class="node-sub">TX Root · State Root</div>
+        </div>
+        <div class="node node-yellow">
+          <div class="node-icon">📦</div>
+          <div class="node-title">Transaction Pool</div>
+          <div class="node-sub">Mempool · Fee Priority</div>
+        </div>
+        <div class="node node-yellow">
+          <div class="node-icon">🗄️</div>
+          <div class="node-title">State DB</div>
+          <div class="node-sub">LevelDB · RocksDB</div>
+        </div>
+        <div class="node node-yellow">
+          <div class="node-icon">📡</div>
+          <div class="node-title">IPFS / Filecoin</div>
+          <div class="node-sub">Off-chain Storage</div>
+        </div>
+        <div class="flow-badge">IMMUTABLE LEDGER</div>
+      </div>
+    </div>
+
+    <div class="arrow-row"><div class="arrow-down"></div></div>
+
+    <!-- LAYER 6: SECURITY & CRYPTO -->
+    <div class="layer layer-6">
+      <div class="layer-label">Bảo Mật</div>
+      <div class="layer-content">
+        <div class="section-title">CRYPTOGRAPHY LAYER — Nền tảng mật mã học</div>
+        <div class="node node-pink">
+          <div class="node-icon">🔑</div>
+          <div class="node-title">ECDSA / EdDSA</div>
+          <div class="node-sub">Digital Signature</div>
+        </div>
+        <div class="node node-pink">
+          <div class="node-icon">#️⃣</div>
+          <div class="node-title">SHA-256 / Keccak</div>
+          <div class="node-sub">Hash Function</div>
+        </div>
+        <div class="node node-pink">
+          <div class="node-icon">🔐</div>
+          <div class="node-title">Public Key Infra.</div>
+          <div class="node-sub">Wallet · Address Gen.</div>
+        </div>
+        <div class="node node-pink">
+          <div class="node-icon">🕵️</div>
+          <div class="node-title">ZK-Proof</div>
+          <div class="node-sub">zk-SNARK · zk-STARK</div>
+        </div>
+        <div class="flow-badge">TRUSTLESS · SECURE</div>
+      </div>
+    </div>
+
+  </div><!-- end diagram -->
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div> Tầng Ứng Dụng</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Smart Contract</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div> Cơ chế Đồng Thuận</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div> Mạng P2P</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> Lớp Dữ Liệu</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ff4d88"></div> Mật Mã Học</div>
+    <div class="legend-item" style="margin-left:20px; opacity:0.4; font-size:0.62rem;">// hover từng node để xem chi tiết //</div>
+  </div>
+
+</div>
+</body>
+</html>
