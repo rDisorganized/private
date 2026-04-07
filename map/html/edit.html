@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Khu Công Nghiệp</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+        .header {
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        #map { flex: 2; height: 100%; }
+        .sidebar {
+            width: 320px;
+            background: #f8f9fa;
+            border-left: 1px solid #ddd;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .item {
+            background: white;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .item button {
+            margin: 3px;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 8px;
+            width: 100%;
+        }
+        .edit-mode { background: #fff3cd; }
+        #status { margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Quản lý Khu Công Nghiệp - Firebase</h2>
+    </div>
+
+    <div class="container">
+        <!-- Bản đồ -->
+        <div id="map"></div>
+
+        <!-- Sidebar danh sách -->
+        <div class="sidebar">
+            <h3>Danh sách Khu Công Nghiệp</h3>
+            <input type="text" id="name" placeholder="Tên khu công nghiệp">
+            <button onclick="saveOrUpdate()">💾 Lưu / Cập nhật</button>
+            <div id="status"></div>
+            <hr>
+            <div id="list"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // ==================== FIREBASE CONFIG ====================
+        const firebaseConfig = {
+            databaseURL: "https://bankvanhungbian-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const ref = db.ref('khu_cong_nghiep');
+
+        // ==================== KHỞI TẠO BẢN ĐỒ ====================
+        const map = L.map('map').setView([10.8231, 106.6297], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        let currentMarker = null;
+        let editingKey = null;        // key đang sửa
+        let markers = {};             // lưu marker theo key để dễ xóa/sửa
+
+        // Click bản đồ để chọn vị trí mới hoặc di chuyển khi sửa
+        map.on('click', function(e) {
+            const latlng = e.latlng;
+
+            if (currentMarker) map.removeLayer(currentMarker);
+
+            currentMarker = L.marker(latlng, { draggable: true }).addTo(map);
+            
+            currentMarker.on('dragend', () => {
+                // vị trí đã thay đổi
+            });
+
+            currentMarker.bindPopup("Đang chọn vị trí - Kéo để di chuyển").openPopup();
+        });
+
+        // ==================== LƯU / CẬP NHẬT ====================
+        function saveOrUpdate() {
+            const name = document.getElementById('name').value.trim();
+            const status = document.getElementById('status');
+
+            if (!currentMarker) {
+                status.innerHTML = `<span style="color:red">❌ Hãy click vào bản đồ để chọn vị trí!</span>`;
+                return;
+            }
+            if (!name) {
+                status.innerHTML = `<span style="color:red">❌ Vui lòng nhập tên khu công nghiệp!</span>`;
+                return;
+            }
+
+            const latlng = currentMarker.getLatLng();
+            const data = {
+                ten: name,
+                lat: latlng.lat,
+                lng: latlng.lng,
+                timestamp: Date.now()
+            };
+
+            if (editingKey) {
+                // Cập nhật
+                ref.child(editingKey).update(data)
+                    .then(() => {
+                        status.innerHTML = `<span style="color:green">✅ Đã cập nhật thành công!</span>`;
+                        resetForm();
+                        loadList();
+                    });
+            } else {
+                // Thêm mới
+                ref.push(data)
+                    .then(() => {
+                        status.innerHTML = `<span style="color:green">✅ Đã thêm mới thành công!</span>`;
+                        resetForm();
+                        loadList();
+                    });
+            }
+        }
+
+        // ==================== TẢI DANH SÁCH & HIỂN THỊ MARKER ====================
+        function loadList() {
+            const listDiv = document.getElementById('list');
+            listDiv.innerHTML = '';
+
+            // Xóa hết marker cũ trên map
+            Object.values(markers).forEach(m => map.removeLayer(m));
+            markers = {};
+
+            ref.on('value', (snapshot) => {
+                listDiv.innerHTML = '';
+                markers = {};
+
+                snapshot.forEach((child) => {
+                    const key = child.key;
+                    const data = child.val();
+
+                    // Tạo marker trên bản đồ
+                    const marker = L.marker([data.lat, data.lng]).addTo(map);
+                    marker.bindPopup(`<b>${data.ten}</b><br>Lat: ${data.lat.toFixed(6)}<br>Lng: ${data.lng.toFixed(6)}`);
+
+                    markers[key] = marker;
+
+                    // Tạo item trong sidebar
+                    const div = document.createElement('div');
+                    div.className = 'item';
+                    div.innerHTML = `
+                        <strong>${data.ten}</strong><br>
+                        <small>Lat: ${data.lat.toFixed(5)} | Lng: ${data.lng.toFixed(5)}</small><br>
+                        <button onclick="editItem('${key}', '${data.ten}', ${data.lat}, ${data.lng})">✏️ Sửa</button>
+                        <button onclick="deleteItem('${key}')">🗑️ Xóa</button>
+                    `;
+                    listDiv.appendChild(div);
+                });
+            });
+        }
+
+        // ==================== SỬA ====================
+        function editItem(key, ten, lat, lng) {
+            editingKey = key;
+            document.getElementById('name').value = ten;
+
+            // Xóa marker tạm thời đang chọn
+            if (currentMarker) map.removeLayer(currentMarker);
+
+            // Tạo marker mới tại vị trí cũ và cho phép kéo
+            currentMarker = L.marker([lat, lng], { draggable: true }).addTo(map);
+            currentMarker.bindPopup("Đang chỉnh sửa - Kéo để thay đổi vị trí").openPopup();
+
+            document.getElementById('status').innerHTML = `<span style="color:orange">Đang sửa: ${ten}</span>`;
+        }
+
+        // ==================== XÓA ====================
+        function deleteItem(key) {
+            if (confirm("Bạn có chắc muốn xóa khu công nghiệp này?")) {
+                ref.child(key).remove()
+                    .then(() => {
+                        document.getElementById('status').innerHTML = `<span style="color:green">✅ Đã xóa thành công!</span>`;
+                        loadList();
+                    })
+                    .catch(err => {
+                        document.getElementById('status').innerHTML = `<span style="color:red">Lỗi: ${err.message}</span>`;
+                    });
+            }
+        }
+
+        // Reset form sau khi lưu hoặc sửa
+        function resetForm() {
+            editingKey = null;
+            document.getElementById('name').value = '';
+            if (currentMarker) {
+                map.removeLayer(currentMarker);
+                currentMarker = null;
+            }
+            document.getElementById('status').innerHTML = '';
+        }
+
+        // Load dữ liệu khi mở trang
+        window.onload = () => {
+            loadList();
+        };
+    </script>
+</body>
+</html>
