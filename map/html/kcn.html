@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đánh dấu Khu Công Nghiệp</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        #map { height: 80vh; width: 100%; }
+        .info {
+            padding: 10px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+        input, button { margin: 5px; padding: 8px; }
+        #saved { margin-top: 10px; color: green; }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h2>Đánh dấu Khu Công Nghiệp</h2>
+        <p>Click vào bản đồ để đặt marker → Nhập tên → Lưu vào Firebase</p>
+        <input type="text" id="name" placeholder="Tên khu công nghiệp (ví dụ: VSIP Bình Dương)">
+        <button onclick="saveToFirebase()">Lưu vào Database</button>
+        <span id="saved"></span>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Firebase SDK v9 (modular) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // ==================== CẤU HÌNH FIREBASE ====================
+        const firebaseConfig = {
+            databaseURL: "https://bankvanhungbian-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ==================== KHỞI TẠO BẢN ĐỒ ====================
+        const map = L.map('map').setView([10.8231, 106.6297], 10); // Trung tâm TP.HCM
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        let currentMarker = null;
+        let currentLatLng = null;
+
+        // Click vào bản đồ để đánh dấu
+        map.on('click', function(e) {
+            const latlng = e.latlng;
+
+            // Xóa marker cũ nếu có
+            if (currentMarker) map.removeLayer(currentMarker);
+
+            // Tạo marker mới
+            currentMarker = L.marker(latlng, { draggable: true }).addTo(map);
+            currentLatLng = latlng;
+
+            // Cho phép kéo marker
+            currentMarker.on('dragend', function() {
+                currentLatLng = currentMarker.getLatLng();
+            });
+
+            // Hiển thị tọa độ tạm thời
+            currentMarker.bindPopup(`<b>Đang chọn:</b><br>Lat: ${latlng.lat.toFixed(6)}<br>Lng: ${latlng.lng.toFixed(6)}`).openPopup();
+        });
+
+        // ==================== LƯU VÀO FIREBASE ====================
+        function saveToFirebase() {
+            const name = document.getElementById('name').value.trim();
+            const status = document.getElementById('saved');
+
+            if (!currentLatLng) {
+                status.textContent = "❌ Hãy click vào bản đồ để chọn vị trí trước!";
+                status.style.color = "red";
+                return;
+            }
+
+            if (!name) {
+                status.textContent = "❌ Vui lòng nhập tên khu công nghiệp!";
+                status.style.color = "red";
+                return;
+            }
+
+            // Tạo key ngẫu nhiên (push) hoặc dùng tên làm key (cẩn thận trùng)
+            const newRef = db.ref('khu_cong_nghiep').push();
+
+            newRef.set({
+                ten: name,
+                lat: currentLatLng.lat,
+                lng: currentLatLng.lng,
+                timestamp: Date.now(),
+                // Có thể thêm trường địa chỉ sau nếu reverse geocoding
+            })
+            .then(() => {
+                status.textContent = `✅ Đã lưu "${name}" thành công!`;
+                status.style.color = "green";
+                document.getElementById('name').value = ''; // reset input
+            })
+            .catch((error) => {
+                status.textContent = "❌ Lỗi: " + error.message;
+                status.style.color = "red";
+                console.error(error);
+            });
+        }
+
+        // ==================== TẢI CÁC MARKER ĐÃ LƯU (tùy chọn) ====================
+        function loadMarkers() {
+            db.ref('khu_cong_nghiep').on('value', (snapshot) => {
+                snapshot.forEach((child) => {
+                    const data = child.val();
+                    if (data.lat && data.lng) {
+                        L.marker([data.lat, data.lng])
+                            .addTo(map)
+                            .bindPopup(`<b>${data.ten}</b><br>Lat: ${data.lat}<br>Lng: ${data.lng}`);
+                    }
+                });
+            });
+        }
+
+        // Gọi load khi trang mở (nếu muốn hiển thị tất cả marker cũ)
+        loadMarkers();
+    </script>
+</body>
+</html>
