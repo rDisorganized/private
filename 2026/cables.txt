@@ -1,0 +1,46 @@
+Hiện nay (năm 2026), thế giới có hàng trăm tuyến cáp quang biển (submarine fiber optic cables) đang hoạt động hoặc đang xây dựng. Theo dữ liệu từ TeleGeography (nguồn uy tín nhất về hạ tầng cáp biển), bản đồ Submarine Cable Map 2026 hiển thị khoảng 694 hệ thống cáp (bao gồm cả đang hoạt động và kế hoạch), với gần 1.893 điểm cập bờ (landing stations). 
+
+resources.telegeography.com
+
+Tổng chiều dài tất cả các tuyến cáp quang biển trên thế giới ước tính vượt 1,9 triệu km (dữ liệu gần nhất cho thấy khoảng 1,97 triệu km với hơn 665 tuyến). 
+
+map.kmcd.dev
+
+Lưu ý quan trọng:Không thể liệt kê "tất cả" vì số lượng quá lớn (hàng trăm tuyến, bao gồm cả cáp nội vùng ngắn và cáp xuyên đại dương dài hàng chục nghìn km). Hầu hết các quốc gia có bờ biển đều được kết nối.
+Hơn 95-98% lưu lượng internet quốc tế đi qua các tuyến cáp này (phần còn lại qua vệ tinh).
+Các tuyến cáp thường được sở hữu bởi consortium (liên minh các nhà mạng) hoặc trực tiếp bởi các ông lớn công nghệ như Google, Meta, Amazon, Microsoft.
+
+Các tuyến cáp quan trọng và nổi bật nhất (một số ví dụ chính):Dưới đây là một số tuyến cáp lớn, dài nhất hoặc có vai trò chiến lược (dựa trên dữ liệu cập nhật 2025-2026):2Africa: Một trong những tuyến dài nhất thế giới (~45.000 km), kết nối châu Âu - châu Phi - Trung Đông - châu Á. Có nhiều nhánh mở rộng (Pearls).
+SEA-ME-WE 6 (SMW-6): Kết nối Đông Nam Á - Trung Đông - Tây Âu, dung lượng rất cao, giúp đa dạng hóa tuyến đường qua Biển Đỏ.
+Asia Direct Cable (ADC): Kết nối Việt Nam (Viettel dẫn đầu) với Trung Quốc, Hồng Kông, Thái Lan, Philippines, Singapore, Nhật Bản. Đây là tuyến có dung lượng lớn nhất Việt Nam hiện nay (~50 Tbps).
+APG (Asia Pacific Gateway), AAE-1 (Asia-Africa-Europe 1), SJC2 (Southeast Asia-Japan Cable 2): Các tuyến quan trọng ở châu Á-Thái Bình Dương.
+Marea, Dunant, Grace Hopper, Firmina: Các tuyến do Google/Meta sở hữu, kết nối Mỹ - châu Âu với dung lượng cực cao.
+Bifrost: Tuyến trực tiếp Singapore - Mỹ (qua Indonesia), giảm độ trễ.
+Equiano, Umoja, Equiano: Các tuyến của Google phục vụ châu Phi.
+Các tuyến xuyên Thái Bình Dương như FASTER, JUPITER, PLCN (Pacific Light Cable Network).
+
+Các tuyến đang sẵn sàng năm 2026 hoặc mới đi vào hoạt động bao gồm: Anjana, Bulikula, Daraja, Honomoana, TPU, v.v. 
+
+submarinecablemap.com
+
+Các điểm nóng (hubs) cáp quang:Ai Cập (đặc biệt khu vực Suez): Nút thắt quan trọng nhất thế giới, nhiều tuyến đi qua Biển Đỏ/Mediterranean.
+Singapore, Marseille (Pháp), Miami/New York (Mỹ), Nhật Bản, Hồng Kông.
+Châu Âu (đặc biệt Tây Âu) có số lượng cáp cập bờ nhiều nhất.
+
+Tình hình ở Việt Nam:Việt Nam hiện kết nối quốc tế chủ yếu qua 6 tuyến cáp quang biển chính (tính đến 2026):AAG (Asia America Gateway)
+IA (Intra-Asia)
+AAE-1
+APG (Asia Pacific Gateway)
+ADC (Asia Direct Cable – mới, dung lượng lớn nhất)
+SJC2 (Southeast Asia-Japan Cable 2)
+
+Và một số tuyến khác như SMW-3. Việt Nam đang đa dạng hóa để giảm rủi ro sự cố (cáp biển thường hay bị đứt do tàu bè, động đất, v.v.). 
+
+thanhnien.vn
+
+Cách xem chi tiết tất cả các tuyến:Cách tốt nhất để xem toàn bộ bản đồ tương tác và thông tin chi tiết (tên tuyến, chiều dài, chủ sở hữu, điểm cập bờ, tình trạng hoạt động):Submarine Cable Map chính thức của TeleGeography: https://www.submarinecablemap.com/ (cập nhật liên tục).
+Bản đồ 2026: Có thể xem phiên bản in hoặc trực tuyến trên trang TeleGeography.
+Các trang khác: SubTel Forum, Wikipedia (List of international submarine communications cables).
+
+Bạn có thể zoom vào khu vực cụ thể (ví dụ: châu Á, xuyên Đại Tây Dương, xuyên Thái Bình Dương) để xem danh sách đầy đủ.Nếu bạn muốn biết chi tiết về một tuyến cụ thể, khu vực nào (ví dụ: châu Á, châu Âu, Việt Nam), hoặc các tuyến mới 2026, hãy cho mình biết thêm để giải thích sâu hơn nhé! Cáp quang biển chính là "xương sống" của internet toàn cầu, và ngành này đang bùng nổ mạnh mẽ nhờ nhu cầu AI và dữ liệu lớn.
+
