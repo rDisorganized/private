@@ -1,0 +1,155 @@
+Quản lý chi phí Domain & Hosting
+Domain
+
+Nhà cung cấp
+
+Năm đăng ký
+
+Số năm gia hạn
+
+Tổng chi phí (VNĐ)
+
+ Thêm mới
+ Reset
+giangnds.com
+2023 (hết hạn)
+Nhà cung cấp
+Matbao
+Năm đăng ký
+2022
+Số năm
+1 năm
+Tiền/năm
+444.444 ₫
+Tổng chi phí
+444.444 ₫
+ Sửa
+ Xóa
+films24h.xyz
+2023 (hết hạn)
+Nhà cung cấp
+Godaddy
+Năm đăng ký
+2022
+Số năm
+1 năm
+Tiền/năm
+444.444 ₫
+Tổng chi phí
+444.444 ₫
+ Sửa
+ Xóa
+xai.buy
+2026 (hết hạn)
+Nhà cung cấp
+X.com 9 tháng 06/2025 - 03/2026
+Năm đăng ký
+2025
+Số năm
+1 năm
+Tiền/năm
+1.492.073 ₫
+Tổng chi phí
+1.492.073 ₫
+ Sửa
+ Xóa
+iq920.fun
+2028
+Nhà cung cấp
+Unstoppable Domains
+Năm đăng ký
+2025
+Số năm
+3 năm
+Tiền/năm
+748.453 ₫
+Tổng chi phí
+2.245.359 ₫
+ Sửa
+ Xóa
+Hosting.vt
+2028
+Nhà cung cấp
+Vt idc
+Năm đăng ký
+2025
+Số năm
+3 năm
+Tiền/năm
+560.667 ₫
+Tổng chi phí
+1.682.000 ₫
+ Sửa
+ Xóa
+Hosting.mb
+2028
+Nhà cung cấp
+Matbao
+Năm đăng ký
+2025
+Số năm
+3 năm
+Tiền/năm
+554.288 ₫
+Tổng chi phí
+1.662.864 ₫
+ Sửa
+ Xóa
+tamtaihoathiphi.info
+2028
+Nhà cung cấp
+Godaddy matbao
+Năm đăng ký
+2025
+Số năm
+3 năm
+Tiền/năm
+656.347 ₫
+Tổng chi phí
+1.969.040 ₫
+ Sửa
+ Xóa
+keancapytuong.xyz
+2028
+Nhà cung cấp
+Mat bao
+Năm đăng ký
+2025
+Số năm
+3 năm
+Tiền/năm
+355.320 ₫
+Tổng chi phí
+1.065.960 ₫
+ Sửa
+ Xóa
+bo0tot.org
+2029
+Nhà cung cấp
+Matbao
+Năm đăng ký
+2025
+Số năm
+4 năm
+Tiền/năm
+389.515 ₫
+Tổng chi phí
+1.558.060 ₫
+ Sửa
+ Xóa
+lck.io.vn
+2032
+Nhà cung cấp
+Nhan hoa
+Năm đăng ký
+2025
+Số năm
+7 năm
+Tiền/năm
+40.286 ₫
+Tổng chi phí
+282.000 ₫
+ Sửa
+ Xóa
+Tổng chi phí: 12.846.244 ₫
+Database: Firebase Realtime DB
