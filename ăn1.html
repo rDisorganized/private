@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ghi & Xem lịch sử bữa ăn (25-50k)</title>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <style>
+    :root {
+      --primary: #4CAF50;
+      --primary-dark: #388E3C;
+      --danger: #ef4444;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+      line-height: 1.6;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 { text-align: center; margin: 20px 0 24px; font-size: 2rem; color: #0f172a; }
+
+    .controls {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .controls select, .controls button {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+    }
+
+    .controls button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .controls button:hover { background: var(--primary-dark); }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    label { display: block; margin: 0 0 8px; font-weight: 600; color: #334155; }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(76,175,80,0.12);
+    }
+
+    .price-group { position: relative; }
+    .price-group input { padding-left: 110px; }
+    .price-group::after {
+      content: "nghìn đồng (35 → 35.000 ₫)";
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+      font-size: 0.95rem;
+    }
+
+    button[type="submit"] {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      min-height: 52px;
+    }
+    button[type="submit"]:hover { background: var(--primary-dark); }
+
+    .cancel-btn {
+      background: #6b7280;
+      margin-top: 12px;
+    }
+    .cancel-btn:hover { background: #4b5563; }
+
+    .message {
+      margin: 16px 0;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 500;
+    }
+    .success { background: #e8f5e9; color: #2e7d32; }
+    .error   { background: #ffebee; color: #c62828; }
+
+    /* Lịch sử */
+    .day-group {
+      margin-bottom: 40px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .day-header {
+      background: #f1f5f9;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .day-header h3 {
+      font-size: 1.35rem;
+      margin: 0;
+      color: #0f172a;
+    }
+
+    .day-total {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .meal-item {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .meal-item:last-child { border-bottom: none; }
+
+    .meal-type {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .type-sáng     { background: #4CAF50; color: white; }
+    .type-phu-sang { background: #8BC34A; color: white; }
+    .type-trua     { background: #2196F3; color: white; }
+    .type-phu-chieu{ background: #f59e0b; color: white; }
+    .type-toi      { background: #8b5cf6; color: white; }
+
+    .meal-name { font-weight: 600; font-size: 1.1rem; margin: 4px 0; }
+    .meal-price { color: #334155; }
+    .meal-note { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
+
+    .actions {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      gap: 8px;
+    }
+    .edit-btn, .delete-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      min-width: 44px;
+    }
+    .edit-btn   { background: #f59e0b; color: white; }
+    .delete-btn { background: var(--danger); color: white; }
+    .edit-btn:hover   { background: #d97706; }
+    .delete-btn:hover { background: #dc2626; }
+
+    @media (max-width: 560px) {
+      .controls { flex-direction: column; align-items: stretch; }
+      .day-header { flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Ghi & Xem bữa ăn</h1>
+
+  <!-- Form nhập liệu -->
+  <div class="card">
+    <form id="mealForm">
+      <input type="hidden" id="editKey" value="">
+
+      <label for="mealName">Tên món / Bữa ăn</label>
+      <input type="text" id="mealName" placeholder="Cơm tấm sườn nướng, sữa chua + chuối..." required>
+
+      <label for="price">Giá tiền</label>
+      <div class="price-group">
+        <input type="number" id="price" min="0" step="1" placeholder="35">
+      </div>
+
+      <label for="type">Loại bữa</label>
+      <select id="type" required>
+        <option value="">Chọn loại...</option>
+        <option value="sáng">Sáng (chính)</option>
+        <option value="phu-sang">Phụ sáng</option>
+        <option value="trua">Trưa (chính)</option>
+        <option value="phu-chieu">Phụ chiều</option>
+        <option value="toi">Tối (chính)</option>
+      </select>
+
+      <label for="note">Ghi chú (tùy chọn)</label>
+      <textarea id="note" rows="2" placeholder="Ít cay, không hành, ăn kèm trà sữa..."></textarea>
+
+      <button type="submit" id="submitBtn">Lưu bữa ăn</button>
+      <button type="button" class="cancel-btn" id="cancelEdit" style="display:none;">Hủy sửa</button>
+    </form>
+
+    <div id="message" class="message" style="display:none;"></div>
+  </div>
+
+  <!-- Controls lọc ngày -->
+  <div class="controls">
+    <select id="dateFilter">
+      <option value="today">Hôm nay</option>
+      <option value="all">Tất cả các ngày</option>
+      <!-- Các ngày khác sẽ được thêm bằng JS -->
+    </select>
+    <button id="btnToday">Xem hôm nay</button>
+  </div>
+
+  <!-- Lịch sử -->
+  <div id="history"></div>
+</div>
+
+<script>
+  // ── THAY BẰNG CONFIG FIREBASE CỦA BẠN ──
+  const firebaseConfig = {
+    apiKey: "AIzaSy...your-api-key-here...",
+    authDomain: "unityvina-1fc51.firebaseapp.com",
+    databaseURL: "https://unityvina-1fc51-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "unityvina-1fc51",
+    storageBucket: "unityvina-1fc51.firebasestorage.app",
+    messagingSenderId: "xxxxxxxxxxxx",
+    appId: "1:xxxxxxxxxxxx:web:xxxxxxxxxxxxxxxx"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const mealsRef = db.ref('meals');
+
+  const mealForm    = document.getElementById('mealForm');
+  const submitBtn   = document.getElementById('submitBtn');
+  const cancelEdit  = document.getElementById('cancelEdit');
+  const editKeyEl   = document.getElementById('editKey');
+  const messageEl   = document.getElementById('message');
+  const historyEl   = document.getElementById('history');
+  const dateFilter  = document.getElementById('dateFilter');
+  const btnToday    = document.getElementById('btnToday');
+
+  let currentEditKey = null;
+
+  // Lấy ngày hôm nay dạng YYYY-MM-DD
+  function getToday() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  // Format ngày đẹp
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('vi-VN', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  }
+
+  // Label loại bữa
+  function getTypeLabel(type) {
+    const map = {
+      'sáng': 'Sáng (chính)',
+      'phu-sang': 'Phụ sáng',
+      'trua': 'Trưa (chính)',
+      'phu-chieu': 'Phụ chiều',
+      'toi': 'Tối (chính)'
+    };
+    return map[type] || type;
+  }
+
+  // Hiển thị danh sách
+  function renderMeals(filter = 'today') {
+    mealsRef.once('value').then(snapshot => {
+      const allMeals = snapshot.val() || {};
+      let dates = Object.keys(allMeals).sort().reverse(); // mới nhất trước
+
+      historyEl.innerHTML = '';
+
+      // Giới hạn hiển thị 30 ngày gần nhất nếu không chọn "all"
+      if (filter !== 'all') {
+        const today = getToday();
+        if (filter === 'today') {
+          dates = [today];
+        } else {
+          dates = dates.slice(0, 30);
+        }
+      }
+
+      // Thêm các ngày vào dropdown (chỉ 1 lần)
+      if (dateFilter.options.length <= 2) {
+        dates.forEach(date => {
+          if (date !== getToday()) {
+            const opt = document.createElement('option');
+            opt.value = date;
+            opt.textContent = formatDate(date);
+            dateFilter.appendChild(opt);
+          }
+        });
+      }
+
+      let hasData = false;
+
+      dates.forEach(date => {
+        const mealsOfDay = allMeals[date];
+        if (!mealsOfDay) return;
+
+        hasData = true;
+        const sortedMeals = Object.entries(mealsOfDay)
+          .map(([key, m]) => ({ key, ...m }))
+          .sort((a, b) => a.timestamp - b.timestamp);
+
+        let dayTotal = 0;
+        sortedMeals.forEach(m => {
+          if (m.price != null && !isNaN(m.price)) dayTotal += Number(m.price);
+        });
+
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day-group';
+        dayDiv.innerHTML = `
+          <div class="day-header">
+            <h3>${formatDate(date)}</h3>
+            <div class="day-total">
+              Tổng: ${dayTotal.toLocaleString('vi-VN')}k ₫
+            </div>
+          </div>
+        `;
+
+        const mealsContainer = document.createElement('div');
+        sortedMeals.forEach(meal => {
+          const priceDisplay = meal.price != null && !isNaN(meal.price)
+            ? `${Number(meal.price).toLocaleString('vi-VN')}k ₫`
+            : '<em>chưa ghi giá</em>';
+
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'meal-item';
+          itemDiv.innerHTML = `
+            <div class="actions">
+              <button class="edit-btn" data-key="${meal.key}" data-date="${date}">Sửa</button>
+              <button class="delete-btn" data-key="${meal.key}" data-date="${date}">Xóa</button>
+            </div>
+            <div class="meal-type type-${meal.type}">${getTypeLabel(meal.type)}</div>
+            <div class="meal-name">${meal.name}</div>
+            <div class="meal-price">Giá: ${priceDisplay}</div>
+            ${meal.note ? `<div class="meal-note">Ghi chú: ${meal.note}</div>` : ''}
+            <small style="color:#94a3b8; display:block; margin-top:8px;">
+              ${new Date(meal.timestamp).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})}
+            </small>
+          `;
+          mealsContainer.appendChild(itemDiv);
+        });
+
+        dayDiv.appendChild(mealsContainer);
+        historyEl.appendChild(dayDiv);
+      });
+
+      if (!hasData) {
+        historyEl.innerHTML = '<p style="text-align:center; color:var(--muted); padding:40px 0; font-size:1.1rem;">Chưa có dữ liệu bữa ăn nào</p>';
+      }
+
+      // Gắn sự kiện sửa / xóa
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const date = btn.dataset.date;
+          const key = btn.dataset.key;
+          const meal = allMeals[date][key];
+          startEdit(key, meal, date);
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!confirm('Xác nhận xóa bữa ăn này?')) return;
+          const date = btn.dataset.date;
+          const key = btn.dataset.key;
+          db.ref(`meals/${date}/${key}`).remove()
+            .then(() => showMessage('Đã xóa thành công', 'success'))
+            .catch(err => showMessage('Lỗi: ' + err.message, 'error'));
+        });
+      });
+    });
+  }
+
+  // Submit form
+  mealForm.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const name  = document.getElementById('mealName').value.trim();
+    const priceStr = document.getElementById('price').value.trim();
+    const type  = document.getElementById('type').value;
+    const note  = document.getElementById('note').value.trim();
+    const editKey = editKeyEl.value;
+
+    if (!name) return showMessage('Vui lòng nhập tên món!', 'error');
+    if (!type) return showMessage('Vui lòng chọn loại bữa!', 'error');
+
+    let price = null;
+    if (priceStr !== '' && !isNaN(priceStr)) {
+      price = Number(priceStr);
+      if (price < 0) price = 0;
+    }
+
+    const data = {
+      name,
+      price,
+      type,
+      note: note || null,
+      timestamp: Date.now()
+    };
+
+    const today = getToday();
+    let ref;
+
+    if (editKey && currentEditKey) {
+      // update
+      ref = db.ref(`meals/${currentEditKey.date}/${editKey}`);
+      ref.update(data);
+    } else {
+      // create
+      ref = db.ref(`meals/${today}`).push();
+      ref.set(data);
+    }
+
+    ref.then(() => {
+      showMessage(editKey ? 'Đã cập nhật!' : 'Đã lưu!', 'success');
+      resetForm();
+      renderMeals(dateFilter.value);
+    }).catch(err => {
+      showMessage('Lỗi: ' + err.message, 'error');
+      console.error(err);
+    });
+  });
+
+  function startEdit(key, meal, date) {
+    currentEditKey = { key, date };
+    editKeyEl.value = key;
+    document.getElementById('mealName').value = meal.name;
+    document.getElementById('price').value = meal.price ?? '';
+    document.getElementById('type').value = meal.type;
+    document.getElementById('note').value = meal.note || '';
+    submitBtn.textContent = 'Cập nhật';
+    cancelEdit.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetForm() {
+    mealForm.reset();
+    editKeyEl.value = '';
+    currentEditKey = null;
+    submitBtn.textContent = 'Lưu bữa ăn';
+    cancelEdit.style.display = 'none';
+  }
+
+  cancelEdit.addEventListener('click', resetForm);
+
+  function showMessage(text, type) {
+    messageEl.textContent = text;
+    messageEl.className = `message ${type}`;
+    messageEl.style.display = 'block';
+    setTimeout(() => messageEl.style.display = 'none', 4000);
+  }
+
+  // Lọc khi thay đổi select
+  dateFilter.addEventListener('change', () => {
+    renderMeals(dateFilter.value);
+  });
+
+  btnToday.addEventListener('click', () => {
+    dateFilter.value = 'today';
+    renderMeals('today');
+  });
+
+  // Load ban đầu
+  renderMeals('today');
+</script>
+</body>
+</html>
