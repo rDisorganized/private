@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Game Expense Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1b2838 0%, #0a0f14 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            color: #8f98a0;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #fff;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #2a3b4c;
+            background: #1e2a36;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #66c0f4;
+            box-shadow: 0 0 10px rgba(102, 192, 244, 0.3);
+        }
+        
+        input::placeholder {
+            color: #5f6c7a;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #66c0f4 0%, #4b8bb4 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 192, 244, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .records-container {
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .records-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .total-amount {
+            background: #66c0f4;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .records-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .record-item {
+            background: #1e2a36;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #66c0f4;
+            transition: all 0.3s ease;
+        }
+        
+        .record-item:hover {
+            transform: translateX(5px);
+            background: #263b4a;
+        }
+        
+        .record-info {
+            flex: 1;
+        }
+        
+        .record-game {
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .record-date {
+            color: #8f98a0;
+            font-size: 12px;
+        }
+        
+        .record-price {
+            color: #66c0f4;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 15px;
+        }
+        
+        .delete-btn {
+            background: rgba(255, 99, 99, 0.2);
+            color: #ff6b6b;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .delete-btn:hover {
+            background: rgba(255, 99, 99, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .status-message.success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+        
+        .status-message.error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
+        
+        .status-message.loading {
+            background: rgba(102, 192, 244, 0.2);
+            color: #66c0f4;
+            border: 1px solid #66c0f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Steam Game Tracker</h1>
+        <p class="subtitle">Theo dõi chi tiêu game trên Steam</p>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div class="input-group">
+            <label>Tên Game</label>
+            <input type="text" id="gameName" placeholder="Nhập tên game..." autocomplete="off">
+        </div>
+        
+        <div class="input-group">
+            <label>Số tiền (VNĐ)</label>
+            <input type="number" id="price" placeholder="Nhập số tiền..." min="0" step="1000">
+        </div>
+        
+        <div class="input-group">
+            <label>Ngày mua</label>
+            <input type="date" id="purchaseDate">
+        </div>
+        
+        <div class="input-group">
+            <label>Đánh giá</label>
+            <select id="rating">
+                <option value="5">⭐⭐⭐⭐⭐ - Tuyệt vời</option>
+                <option value="4">⭐⭐⭐⭐ - Rất tốt</option>
+                <option value="3">⭐⭐⭐ - Tạm ổn</option>
+                <option value="2">⭐⭐ - Không hay</option>
+                <option value="1">⭐ - Tệ</option>
+            </select>
+        </div>
+        
+        <button onclick="saveGame()" id="saveBtn">💾 Lưu giao dịch</button>
+        
+        <div class="records-container">
+            <div class="records-header">
+                <span>📝 Lịch sử giao dịch</span>
+                <span class="total-amount" id="totalAmount">0đ</span>
+            </div>
+            <div id="recordsList" class="records-list">
+                <!-- Records will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const FIREBASE_URL = 'https://dotnhachungmay-default-rtdb.asia-southeast1.firebasedatabase.app';
+        const GAMES_PATH = '/steam-games.json';
+        
+        // Set today's date as default for date input
+        document.getElementById('purchaseDate').valueAsDate = new Date();
+        
+        // Load records on page load
+        window.onload = function() {
+            loadGames();
+        };
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 3000);
+        }
+        
+        async function saveGame() {
+            const gameName = document.getElementById('gameName').value.trim();
+            const price = document.getElementById('price').value.trim();
+            const purchaseDate = document.getElementById('purchaseDate').value;
+            const rating = document.getElementById('rating').value;
+            
+            if (!gameName || !price || !purchaseDate) {
+                showStatus('Vui lòng điền đầy đủ thông tin!', 'error');
+                return;
+            }
+            
+            const gameData = {
+                gameName: gameName,
+                price: parseInt(price),
+                purchaseDate: purchaseDate,
+                rating: parseInt(rating),
+                timestamp: new Date().toISOString()
+            };
+            
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '⏳ Đang lưu...';
+            
+            try {
+                const response = await fetch(FIREBASE_URL + GAMES_PATH, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(gameData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Lỗi khi lưu dữ liệu');
+                }
+                
+                showStatus('Đã lưu giao dịch thành công!', 'success');
+                
+                // Clear inputs
+                document.getElementById('gameName').value = '';
+                document.getElementById('price').value = '';
+                document.getElementById('purchaseDate').valueAsDate = new Date();
+                document.getElementById('rating').value = '5';
+                
+                // Reload records
+                await loadGames();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('Có lỗi xảy ra khi lưu dữ liệu!', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 Lưu giao dịch';
+            }
+        }
+        
+        async function loadGames() {
+            try {
+                const response = await fetch(FIREBASE_URL + GAMES_PATH);
+                
+                if (!response.ok) {
+                    throw new Error('Lỗi khi tải dữ liệu');
+                }
+                
+                const data = await response.json();
+                displayRecords(data);
+                
+            } catch (error) {
+                console.error('Error loading games:', error);
+                showStatus('Không thể tải dữ liệu từ Firebase!', 'error');
+            }
+        }
+        
+        function displayRecords(data) {
+            const recordsList = document.getElementById('recordsList');
+            const totalAmountEl = document.getElementById('totalAmount');
+            
+            if (!data || Object.keys(data).length === 0) {
+                recordsList.innerHTML = '<div style="color: #8f98a0; text-align: center; padding: 20px;">Chưa có giao dịch nào</div>';
+                totalAmountEl.textContent = '0đ';
+                return;
+            }
+            
+            let html = '';
+            let total = 0;
+            
+            // Convert object to array and sort by timestamp (newest first)
+            const games = Object.entries(data).map(([key, value]) => ({
+                id: key,
+                ...value
+            })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            games.forEach(game => {
+                total += game.price || 0;
+                
+                // Format date
+                const purchaseDate = new Date(game.purchaseDate);
+                const formattedDate = purchaseDate.toLocaleDateString('vi-VN');
+                
+                // Get rating stars
+                const stars = '⭐'.repeat(game.rating || 0);
+                
+                html += `
+                    <div class="record-item">
+                        <div class="record-info">
+                            <div class="record-game">${escapeHtml(game.gameName)} ${stars}</div>
+                            <div class="record-date">${formattedDate}</div>
+                        </div>
+                        <div class="record-price">${formatCurrency(game.price)}đ</div>
+                        <button class="delete-btn" onclick="deleteGame('${game.id}')" title="Xóa">✕</button>
+                    </div>
+                `;
+            });
+            
+            recordsList.innerHTML = html;
+            totalAmountEl.textContent = formatCurrency(total) + 'đ';
+        }
+        
+        async function deleteGame(gameId) {
+            if (!confirm('Bạn có chắc muốn xóa giao dịch này?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${FIREBASE_URL}/steam-games/${gameId}.json`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Lỗi khi xóa dữ liệu');
+                }
+                
+                showStatus('Đã xóa giao dịch thành công!', 'success');
+                await loadGames();
+                
+            } catch (error) {
+                console.error('Error deleting game:', error);
+                showStatus('Có lỗi xảy ra khi xóa dữ liệu!', 'error');
+            }
+        }
+        
+        function formatCurrency(amount) {
+            return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+        
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
