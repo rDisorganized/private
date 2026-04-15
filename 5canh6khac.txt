@@ -1,0 +1,60 @@
+Trong văn hóa truyền thống Việt Nam và phương Đông, một đêm (từ lúc mặt trời lặn đến lúc mặt trời mọc) thường được chia thành **5 canh**. Mỗi canh tương ứng với 2 giờ đồng hồ hiện đại.
+Dưới đây là cách tính thời gian cụ thể cho từng canh:
+### Bảng phân chia các canh giờ
+| Canh | Khoảng thời gian | Giờ địa chi | Đặc điểm truyền thống |
+|---|---|---|---|
+| **Canh 1** | 19:00 – 21:00 | Giờ Tuất | Lúc mới bắt đầu đêm, mọi người nghỉ ngơi. |
+| **Canh 2** | 21:00 – 23:00 | Giờ Hợi | Thời điểm đêm bắt đầu sâu, vạn vật đi vào giấc ngủ. |
+| **Canh 3** | 23:00 – 01:00 | Giờ Tý | **Nửa đêm**, thời điểm chuyển giao ngày cũ và mới. |
+| **Canh 4** | 01:00 – 03:00 | Giờ Sửu | Lúc đêm tĩnh mịch nhất, sương xuống nhiều. |
+| **Canh 5** | 03:00 – 05:00 | Giờ Dần | Lúc trời sắp sáng, gà bắt đầu gáy báo thức. |
+### Một số khái niệm liên quan
+ * **Khắc:** Nếu đêm chia làm 5 canh thì ngày được chia làm **6 khắc**. Tổng cộng một ngày đêm có 11 khoảng thời gian (tuy nhiên cách tính khắc thường phức tạp hơn và thay đổi tùy theo mùa).
+ * **Tiếng trống canh:** Ngày xưa, ở các làng quê hoặc thành thị thường có người đi tuần và đánh trống hoặc gõ mõ để báo giờ.
+   * *Canh 1: 1 tiếng trống.*
+   * *Canh 3: 3 tiếng trống (báo hiệu đúng nửa đêm).*
+> "Đêm năm canh, ngày sáu khắc" là câu nói quen thuộc để chỉ sự trôi đi của thời gian trong văn chương và đời sống xưa. Nếu bạn đang tìm hiểu để đưa vào các dự án quản lý thời gian hoặc sáng tác văn học, việc nắm rõ các mốc này sẽ giúp tạo nên chiều sâu văn hóa rất tốt.
+> 
+
+
+
+
+
+
+
+
+
+Việc phân chia **Canh** và **Khắc** là hệ thống đo lường thời gian dựa trên sự quan sát thiên nhiên và quy luật vận hành của đất trời trong văn hóa Đông Á. Nếu "Canh" dùng để đo đêm, thì "Khắc" là đơn vị dùng để tính toán thời gian cho cả ngày và đêm với độ chính xác cao hơn.
+Dưới đây là luận giải chi tiết về hai khái niệm này:
+### 1. Luận về "Canh" (Đo đêm)
+Người xưa chia đêm làm **5 canh**, bắt đầu từ lúc mặt trời lặn (hết giờ Dậu) đến lúc mặt trời mọc (bắt đầu giờ Mão).
+ * **Ý nghĩa:** Việc chia canh gắn liền với nhiệm vụ tuần phòng và canh gác. Tiếng trống canh không chỉ báo giờ mà còn là tín hiệu an ninh cho làng xóm.
+ * **Điểm đặc biệt:** Độ dài của một canh có thể thay đổi nhẹ theo mùa (mùa đông đêm dài hơn mùa hè), nhưng về cơ bản được quy ước là **2 giờ đồng hồ** hiện đại.
+| Canh | Thời gian | Tương ứng | Ý nghĩa tượng trưng |
+|---|---|---|---|
+| **Canh 1** | 19h - 21h | Giờ Tuất | Hoàng hôn, lúc chó giữ nhà bắt đầu trực chiến. |
+| **Canh 2** | 21h - 23h | Giờ Hợi | Đêm khuya, lúc vạn vật cần sự tĩnh lặng tuyệt đối. |
+| **Canh 3** | 23h - 01h | Giờ Tý | **Chính Tý**, thời điểm âm cực sinh dương, chuyển giao khí tiết. |
+| **Canh 4** | 01h - 03h | Giờ Sửu | Lúc trâu bắt đầu nhai lại để chuẩn bị ra đồng. |
+| **Canh 5** | 03h - 05h | Giờ Dần | Bình minh hé rạng, hổ rời hang, bắt đầu ngày mới. |
+### 2. Luận về "Khắc" (Đo ngày và đêm)
+"Khắc" là đơn vị nhỏ hơn canh. Chữ "Khắc" (刻) nghĩa là chạm khắc, xuất phát từ việc vạch các vạch lên đồng hồ nước (thanh lậu) để đo thời gian.
+ * **Hệ thống cũ:** Một ngày đêm (24 giờ) được chia làm **100 khắc**. Một khắc lúc này bằng khoảng 14,4 phút.
+ * **Hệ thống phổ biến (Dân gian):** Thường nghe câu "Ngày sáu khắc, đêm năm canh".
+   * **Đêm 5 canh:** Chiếm 10 giờ.
+   * **Ngày 6 khắc:** Chiếm 14 giờ còn lại. Như vậy, mỗi "khắc" ban ngày tương đương khoảng **2 giờ 20 phút**.
+> **Lưu ý:** Trong thuật toán tử vi hay các phép tính hiện đại hơn, 1 giờ địa chi (2 tiếng đồng hồ) thường được chia thành **8 khắc**. Lúc này, mỗi khắc tương đương **15 phút**.
+> 
+### 3. Mối liên hệ văn hóa và đời sống
+Sự kết hợp giữa canh và khắc tạo ra một nhịp sống chậm và gắn kết với thiên nhiên:
+ * **Trong văn chương:** Các thi sĩ thường dùng "canh" để diễn tả nỗi sầu muộn hoặc sự thao thức.
+   * *Ví dụ: "Canh bốn canh năm vừa chợp mắt / Sao vàng năm cánh mộng hồn quanh." (Hồ Chí Minh)*
+ * **Trong phong thủy & Bói toán:** Việc xác định chính xác khắc nào trong canh nào rất quan trọng để tìm "giờ hoàng đạo", vì mỗi khắc lại mang một ý nghĩa cát - hung (tốt - xấu) khác nhau.
+**Tóm lại:** * **Canh** là thước đo của bóng đêm, mang tính tĩnh và bảo vệ.
+ * **Khắc** là thước đo của sự chuyển động, mang tính vận hành và chi tiết.
+Hiểu về canh và khắc không chỉ là hiểu về thời gian, mà còn là hiểu về cách người xưa tìm thấy sự cân bằng giữa nhịp sinh học của con người và nhịp điệu của vũ trụ.
+
+
+
+
+
