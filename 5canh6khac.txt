@@ -22,6 +22,46 @@ Dưới đây là cách tính thời gian cụ thể cho từng canh:
 
 
 
+Trong cách tính thời gian cổ của người Việt, cụm từ "Ngày sáu khắc" dùng để chỉ toàn bộ thời gian ban ngày (từ lúc mặt trời mọc đến khi mặt trời lặn). [1, 2] 
+Dưới đây là các ý nghĩa phổ biến của "6 khắc":
+## 1. "Ngày sáu khắc" (Đơn vị đo ban ngày)
+Người xưa chia một ngày đêm thành "Đêm năm canh, ngày sáu khắc". [3, 4] 
+
+* Thời gian: Kéo dài khoảng 14 tiếng đồng hồ.
+* Khung giờ: Bắt đầu từ 5 giờ sáng (đầu giờ Mão) đến 19 giờ tối (đầu giờ Tuất).
+* Cách chia: Sáu khắc này không bằng nhau hoàn toàn mà thay đổi tùy theo mùa (ngày dài hay đêm dài), nhưng trung bình mỗi khắc ban ngày tương đương khoảng 2 tiếng 20 phút. [2] 
+
+## 2. "6 khắc" theo nghĩa đơn lẻ (Phút)
+Nếu hiểu "khắc" là đơn vị nhỏ để chia một giờ (theo hệ thống đo lường cổ), thì:
+
+* 1 khắc = 15 phút.
+* 6 khắc = 90 phút (tức là 1 tiếng 30 phút). [5] 
+
+## 3. Bảng phân chia thời gian ban ngày (Sáu khắc)
+Hệ thống này thường được tính từ lúc bình minh đến khi trời tối: [1, 2] 
+
+| Khắc | Khoảng giờ (Tham khảo) | Tương ứng giờ âm lịch |
+|---|---|---|
+| Khắc 1 | 05:00 – 07:20 | Đầu giờ Mão – Giữa giờ Thìn |
+| Khắc 2 | 07:20 – 09:40 | Giữa giờ Thìn – Đầu giờ Tỵ |
+| Khắc 3 | 09:40 – 12:00 | Đầu giờ Tỵ – Giữa giờ Ngọ |
+| Khắc 4 | 12:00 – 14:20 | Giữa giờ Ngọ – Đầu giờ Mùi |
+| Khắc 5 | 14:20 – 16:40 | Đầu giờ Mùi – Giữa giờ Thân |
+| Khắc 6 | 16:40 – 19:00 | Giữa giờ Thân – Đầu giờ Tuất |
+
+Lưu ý: Khái niệm "khắc" có thể gây nhầm lẫn tùy theo ngữ cảnh (chia nhỏ 1 giờ hay chia cả ngày). Tuy nhiên, phổ biến nhất trong văn hóa Việt Nam vẫn là cách tính ban ngày gồm 6 khắc. [4] 
+Bạn đang muốn tìm hiểu về cách tính giờ để làm lễ hay chỉ đơn giản là tra cứu thời gian cổ?
+
+[1] [https://thnguyenvietxuangovap.hcm.edu.vn](https://thnguyenvietxuangovap.hcm.edu.vn/tai-nguyen/cach-tinh-gio-theo-canh-cua-cac-cu-ngay-xua/ctmb/23027/560864)
+[2] [https://www.facebook.com](https://www.facebook.com/100063554553453/posts/gi%E1%BB%9D-con-gi%C3%A1p-v%C3%A0-%C4%91%C3%AAm-n%C4%83m-canh-ng%C3%A0y-s%C3%A1u-kh%E1%BA%AFc-%C4%91%C6%A1n-v%E1%BB%8B-%C4%91o-th%E1%BB%9Di-gian-c%E1%BB%A7a-ng%C6%B0%E1%BB%9Di-vi%E1%BB%87t-x%C6%B0/334464365099324/)
+[3] [https://danviet.vn](https://danviet.vn/nguoi-viet-xua-tinh-cac-gio-trong-ngay-nhu-the-nao-20221106182912388-d1054768.html#:~:text=%E2%80%9C%C4%90%C3%AAm%20n%C4%83m%20canh%E2%80%9D%20%E1%BB%A9ng%20v%E1%BB%9Bi%2010%20gi%E1%BB%9D,%C4%91%C3%AAm%20%C4%91%E1%BA%BFn%2001%20gi%E1%BB%9D%20s%C3%A1ng%20%28gi%E1%BB%9D%20T%C3%BD%29.)
+[4] [https://www.youtube.com](https://www.youtube.com/shorts/hehHXHqVjtw#:~:text=C%C3%A2u%20n%C3%B3i%20n%C3%A0y%20v%E1%BB%91n%20r%E1%BA%A5t%20ph%E1%BB%95%20bi%E1%BA%BFn,nh%E1%BB%AFng%20%C4%91%C6%A1n%20v%E1%BB%8B%20c%E1%BB%95%20nh%C6%B0%20canh%2C%20kh%E1%BA%AFc!)
+[5] [https://vi.wikipedia.org](https://vi.wikipedia.org/wiki/H%E1%BB%87_%C4%91o_l%C6%B0%E1%BB%9Dng_c%E1%BB%95_Trung_Hoa#:~:text=1%20kh%E1%BA%AFc%20%28%E5%88%BB%2C%20ke%29%20=%2060%20ph%C3%A2n%20=%2015%20ph%C3%BAt.)
+
+
+
+
+
 
 
 Việc phân chia **Canh** và **Khắc** là hệ thống đo lường thời gian dựa trên sự quan sát thiên nhiên và quy luật vận hành của đất trời trong văn hóa Đông Á. Nếu "Canh" dùng để đo đêm, thì "Khắc" là đơn vị dùng để tính toán thời gian cho cả ngày và đêm với độ chính xác cao hơn.
