@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🤖 Auto Bot — Cookie Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #04050f;
+  --surface: rgba(8,12,35,0.94);
+  --surface2: rgba(0,200,255,0.05);
+  --border: rgba(0,200,255,0.2);
+  --border2: rgba(0,200,255,0.45);
+  --cyan: #00e5ff;
+  --magenta: #ff00cc;
+  --green: #00ff9d;
+  --text: #c8e6f0;
+  --text2: #4a6a7a;
+  --danger: #ff2255;
+  --warn: #ffaa00;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-display: 'Orbitron', monospace;
+  --font-ui: 'Rajdhani', sans-serif;
+  --dash-bg: rgba(4,5,15,0.97);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  overflow-x: hidden;
+}
+
+/* ── GRID BG ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+
+/* ── SCAN LINE ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+  );
+  pointer-events: none;
+}
+
+/* ── BOT SCENE ── */
+#scene {
+  position: fixed; inset: 0; z-index: 1;
+  pointer-events: none; overflow: hidden;
+}
+.bot {
+  position: absolute;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  background: radial-gradient(circle at 35% 35%, #00e5ff 0%, #002288 100%);
+  box-shadow: 0 0 18px rgba(0,229,255,0.6), 0 0 50px rgba(0,229,255,0.2);
+  pointer-events: none;
+  will-change: transform, left, top;
+}
+.bot-label {
+  position: absolute;
+  bottom: -16px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+/* ── TOGGLE BUTTON (always visible) ── */
+#toggleBtn {
+  position: fixed;
+  top: 20px; right: 20px;
+  z-index: 9999;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 18px;
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 9px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 0 20px rgba(0,229,255,0.15);
+  transition: all 0.25s;
+  user-select: none;
+}
+#toggleBtn:hover {
+  background: rgba(0,229,255,0.12);
+  box-shadow: 0 0 30px rgba(0,229,255,0.3);
+  border-color: var(--cyan);
+}
+#toggleBtn .t-icon { font-size: 16px; }
+#toggleBtn .t-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.4s infinite;
+  flex-shrink: 0;
+}
+
+/* ── LIVE HUD (visible when dashboard hidden) ── */
+#liveHud {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  display: flex; gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 20px;
+  backdrop-filter: blur(12px);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+#liveHud .hud-chip { text-align: center; }
+#liveHud .hud-val { color: var(--cyan); font-size: 18px; font-weight: bold; }
+#liveHud .hud-lbl { color: var(--text2); font-size: 10px; letter-spacing: 1px; }
+.hud-divider { width: 1px; background: var(--border); margin: 4px 0; }
+
+/* Bot count ring */
+#botRing {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 7;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+#botRing svg { display: block; }
+#botRingText {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-family: var(--font-display);
+}
+#botRingNum {
+  font-size: 42px; font-weight: 900; color: var(--cyan);
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(0,229,255,0.8);
+}
+#botRingLbl {
+  font-size: 11px; color: var(--text2);
+  letter-spacing: 2px; margin-top: 4px;
+}
+
+/* ── DASHBOARD OVERLAY ── */
+#dashboard {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--dash-bg);
+  backdrop-filter: blur(6px);
+  overflow-y: auto;
+  transition: opacity 0.35s, transform 0.35s;
+  transform-origin: top right;
+}
+#dashboard.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.97) translateY(-8px);
+}
+
+.app {
+  position: relative; z-index: 10;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+  gap: 16px;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 20px;
+  backdrop-filter: blur(12px);
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 42px; height: 42px;
+  border: 2px solid var(--cyan);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 0 14px rgba(0,229,255,0.5);
+  flex-shrink: 0;
+}
+.logo-text h1 {
+  font-family: var(--font-display);
+  font-size: 16px; font-weight: 700; letter-spacing: 3px;
+  color: var(--cyan); text-transform: uppercase;
+}
+.logo-text p {
+  font-size: 10px; color: var(--text2); letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+.header-stats { display: flex; gap: 20px; }
+.stat-chip { text-align: right; }
+.stat-chip .val {
+  font-size: 22px; font-weight: 700; color: var(--cyan);
+  font-family: var(--font-display); line-height: 1;
+}
+.stat-chip .lbl { font-size: 11px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; }
+.status-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(0,255,157,0.08);
+  border: 1px solid rgba(0,255,157,0.3);
+  border-radius: 20px; padding: 6px 14px;
+  font-size: 12px; font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--green); letter-spacing: 2px;
+}
+.pulse {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.4s infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.65)} }
+
+/* ── CLOSE BUTTON inside dashboard ── */
+#closeDash {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 16px;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: 10px; font-weight: 600; letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+#closeDash:hover { background: rgba(0,229,255,0.15); box-shadow: 0 0 12px rgba(0,229,255,0.3); }
+
+/* ── MAIN GRID ── */
+main {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+}
+
+/* ── PANELS ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  backdrop-filter: blur(12px);
+}
+.panel-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--cyan);
+  font-family: var(--font-display);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px; margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+
+/* ── BOT COUNT PANEL ── */
+.bot-count-display {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(0,229,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.bc-number {
+  font-family: var(--font-display);
+  font-size: 40px; font-weight: 900;
+  color: var(--cyan);
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(0,229,255,0.6);
+  min-width: 50px;
+}
+.bc-info { flex: 1; }
+.bc-label { font-size: 11px; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; font-family: var(--font-display); }
+.bc-sub { font-size: 12px; color: var(--text); font-family: var(--font-mono); margin-top: 4px; }
+.bc-bar-wrap { height: 4px; background: rgba(0,229,255,0.12); border-radius: 2px; margin-top: 8px; }
+.bc-bar { height: 4px; background: var(--cyan); border-radius: 2px; transition: width 0.5s ease; box-shadow: 0 0 8px rgba(0,229,255,0.5); }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--cyan);
+  font-family: var(--font-ui);
+  font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn:hover { background: rgba(0,200,255,0.15); border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,229,255,0.3); }
+.btn:active { transform: scale(0.97); }
+.btn.danger { border-color: rgba(255,34,85,0.5); color: var(--danger); background: rgba(255,34,85,0.07); }
+.btn.danger:hover { background: rgba(255,34,85,0.18); border-color: var(--danger); box-shadow: 0 0 10px rgba(255,34,85,0.3); }
+.btn.success { border-color: rgba(0,255,157,0.5); color: var(--green); background: rgba(0,255,157,0.07); }
+.btn.success:hover { background: rgba(0,255,157,0.18); border-color: var(--green); box-shadow: 0 0 10px rgba(0,255,157,0.3); }
+.btn.warn { border-color: rgba(255,170,0,0.5); color: var(--warn); background: rgba(255,170,0,0.07); }
+.btn.sm { padding: 4px 9px; font-size: 12px; }
+.btn-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+
+/* ── COOKIE LIST ── */
+.cookie-list { max-height: 300px; overflow-y: auto; }
+.cookie-list::-webkit-scrollbar { width: 3px; }
+.cookie-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.cookie-item {
+  background: rgba(0,229,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px;
+  margin-bottom: 7px;
+  transition: border-color 0.2s;
+}
+.cookie-item:hover { border-color: var(--cyan); }
+.cookie-item .ci-head { display: flex; justify-content: space-between; align-items: flex-start; }
+.cookie-item .ci-name { font-weight: 600; color: var(--text); font-size: 13px; }
+.cookie-item .ci-meta { font-size: 11px; color: var(--text2); font-family: var(--font-mono); margin-top: 3px; }
+.ci-badge {
+  font-size: 10px; letter-spacing: 1px; font-weight: 700;
+  padding: 2px 7px; border-radius: 10px;
+  background: rgba(0,229,255,0.1); color: var(--cyan);
+  border: 1px solid rgba(0,229,255,0.25);
+  white-space: nowrap;
+}
+.ci-actions { display: flex; gap: 5px; margin-top: 8px; }
+.empty-state { text-align: center; padding: 24px 0; color: var(--text2); font-size: 13px; }
+.empty-state .icon { font-size: 28px; margin-bottom: 8px; }
+
+/* ── RIGHT COL ── */
+.right-col { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; max-height: 200px; overflow-y: auto; }
+.table-wrap::-webkit-scrollbar { width: 3px; height: 3px; }
+.table-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--font-mono); }
+th {
+  font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text2); font-family: var(--font-display);
+  padding: 6px 10px; text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.25); position: sticky; top: 0;
+}
+td { padding: 6px 10px; border-bottom: 1px solid rgba(0,229,255,0.06); color: var(--text); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+tr:hover td { background: rgba(0,229,255,0.04); }
+.td-key { color: var(--cyan); }
+.td-del { cursor: pointer; color: var(--danger); font-size: 11px; padding: 3px 8px; }
+.td-del:hover { text-decoration: underline; }
+
+/* ── LOG ── */
+.log-body { max-height: 180px; overflow-y: auto; font-family: var(--font-mono); font-size: 11px; }
+.log-body::-webkit-scrollbar { width: 3px; }
+.log-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.log-entry { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); line-height: 1.5; }
+.log-time { color: var(--text2); }
+.log-action { color: var(--cyan); font-weight: 500; }
+.log-detail { color: var(--text); }
+
+/* ── ACTIVITY BAR ── */
+.activity-bars { display: flex; align-items: flex-end; gap: 3px; height: 56px; }
+.a-bar { flex: 1; border-radius: 2px 2px 0 0; min-height: 3px; transition: height 0.4s ease; }
+
+/* ── INPUT ── */
+input[type=text] {
+  width: 100%;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input[type=text]:focus { border-color: var(--cyan); box-shadow: 0 0 8px rgba(0,229,255,0.2); }
+input[type=file] { display: none; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--text2); font-family: var(--font-mono);
+}
+footer .footer-right { display: flex; gap: 20px; }
+
+/* ── SPARK ── */
+.spark {
+  position: fixed; pointer-events: none; z-index: 9999;
+  width: 20px; height: 20px; margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,229,255,0.9), transparent);
+  animation: sparkAnim 0.5s ease-out forwards;
+}
+@keyframes sparkAnim { 0%{transform:scale(0);opacity:1} 100%{transform:scale(4);opacity:0} }
+
+/* ── NOTIF ── */
+.notif {
+  position: fixed; top: 76px; right: 24px; z-index: 99999;
+  background: var(--surface);
+  border: 1px solid var(--cyan);
+  border-radius: 8px; padding: 10px 16px;
+  font-size: 12px; color: var(--cyan);
+  font-family: var(--font-mono);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 20px rgba(0,229,255,0.2);
+  animation: slideIn 0.3s ease, fadeOut 0.4s 2.2s forwards;
+  max-width: 280px;
+}
+.notif.err { border-color: var(--danger); color: var(--danger); box-shadow: 0 0 20px rgba(255,34,85,0.2); }
+.notif.ok { border-color: var(--green); color: var(--green); box-shadow: 0 0 20px rgba(0,255,157,0.2); }
+@keyframes slideIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+@keyframes fadeOut { from{opacity:1} to{opacity:0;pointer-events:none} }
+
+@media (max-width: 760px) {
+  main { grid-template-columns: 1fr; }
+  .header-stats { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- BOT SCENE (always visible behind dashboard) -->
+<div id="scene"></div>
+
+<!-- BOT COUNT RING (shown when dashboard hidden) -->
+<div id="botRing">
+  <svg width="200" height="200" viewBox="0 0 200 200">
+    <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(0,229,255,0.1)" stroke-width="2"/>
+    <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(0,229,255,0.5)" stroke-width="2"
+      stroke-dasharray="553" id="ringProgress" stroke-linecap="round"
+      transform="rotate(-90 100 100)"
+      style="transition: stroke-dashoffset 0.6s ease"/>
+    <circle cx="100" cy="100" r="76" fill="rgba(4,5,15,0.7)" />
+  </svg>
+  <div id="botRingText">
+    <div id="botRingNum">0</div>
+    <div id="botRingLbl">BOT ACTIVE</div>
+  </div>
+</div>
+
+<!-- LIVE HUD (shown when dashboard hidden) -->
+<div id="liveHud">
+  <div class="hud-chip">
+    <div class="hud-val" id="hudActions">0</div>
+    <div class="hud-lbl">Hành Động</div>
+  </div>
+  <div class="hud-divider"></div>
+  <div class="hud-chip">
+    <div class="hud-val" id="hudBots">0</div>
+    <div class="hud-lbl">Bots</div>
+  </div>
+  <div class="hud-divider"></div>
+  <div class="hud-chip">
+    <div class="hud-val" id="hudCookies">0</div>
+    <div class="hud-lbl">Cookies</div>
+  </div>
+  <div class="hud-divider"></div>
+  <div class="hud-chip">
+    <div class="hud-val" id="hudUptime">0s</div>
+    <div class="hud-lbl">Uptime</div>
+  </div>
+</div>
+
+<!-- TOGGLE BUTTON (always visible) -->
+<button id="toggleBtn" onclick="toggleDashboard()">
+  <span class="t-dot" id="toggleDot"></span>
+  <span class="t-icon" id="toggleIcon">📊</span>
+  <span id="toggleLabel">DASHBOARD</span>
+</button>
+
+<!-- DASHBOARD OVERLAY -->
+<div id="dashboard">
+  <div class="app">
+
+    <header>
+      <div class="logo">
+        <div class="logo-icon">🤖</div>
+        <div class="logo-text">
+          <h1>Auto Bot</h1>
+          <p>COOKIE MANAGEMENT SYSTEM v2.0</p>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-chip">
+          <div class="val" id="statActions">0</div>
+          <div class="lbl">Hành động</div>
+        </div>
+        <div class="stat-chip">
+          <div class="val" id="statSaved">0</div>
+          <div class="lbl">Đã lưu</div>
+        </div>
+        <div class="stat-chip">
+          <div class="val" id="statBots">0</div>
+          <div class="lbl">Bots Active</div>
+        </div>
+        <div class="stat-chip">
+          <div class="val" id="statLiveCookies">0</div>
+          <div class="lbl">Cookies</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="status-pill">
+          <div class="pulse" id="pulse"></div>
+          <span id="statusText">RUNNING</span>
+        </div>
+        <button id="closeDash" onclick="toggleDashboard()">
+          👁 ẨN DASHBOARD
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- LEFT: COOKIE MANAGER -->
+      <div class="panel">
+        <div class="panel-title">🍪 Quản Lý Cookie</div>
+
+        <!-- BOT COUNT DISPLAY -->
+        <div class="bot-count-display">
+          <div class="bc-number" id="bcNumber">0</div>
+          <div class="bc-info">
+            <div class="bc-label">Bot Đang Hoạt Động</div>
+            <div class="bc-sub" id="bcSub">Từ cookie: <span id="bcCookieVal">–</span></div>
+            <div class="bc-bar-wrap"><div class="bc-bar" id="bcBar" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn success" onclick="saveCurrentCookies()">💾 Lưu Cookie</button>
+          <button class="btn" onclick="downloadAll()">⬇️ Tải Về</button>
+          <button class="btn" onclick="document.getElementById('upFile').click()">⬆️ Upload</button>
+          <input type="file" id="upFile" accept=".json" onchange="uploadCookies(event)">
+        </div>
+
+        <div style="display:flex;gap:6px;margin-bottom:12px">
+          <input type="text" id="cookieName" placeholder="Tên cookie (tuỳ chọn)..." />
+        </div>
+
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;font-family:var(--font-display)">
+          Danh sách đã lưu (<span id="savedCount">0</span>)
+        </div>
+        <div class="cookie-list" id="cookieList">
+          <div class="empty-state"><div class="icon">🗂️</div>Chưa có cookie nào được lưu</div>
+        </div>
+
+        <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
+          <button class="btn danger" onclick="clearAllSaved()">🗑 Xóa Tất Cả Đã Lưu</button>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right-col">
+
+        <!-- LIVE TABLE -->
+        <div class="panel">
+          <div class="panel-title">🔍 Cookie Trình Duyệt</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px">
+            <button class="btn sm" onclick="refreshLive()">↻ Làm mới</button>
+            <button class="btn sm danger" onclick="clearAllLive()">✕ Xóa Hết</button>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:10px">
+            <input type="text" id="newKey" placeholder="Tên cookie..." style="flex:1" />
+            <input type="text" id="newVal" placeholder="Giá trị..." style="flex:2" />
+            <button class="btn sm success" onclick="addCustomCookie()">Ghi</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Tên</th><th>Giá trị</th><th>Xóa</th></tr></thead>
+              <tbody id="liveTable"><tr><td colspan="3" style="color:var(--text2);text-align:center;padding:14px">Không có cookie</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ACTIVITY + CONTROLS -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="panel">
+            <div class="panel-title">📊 Hoạt Động</div>
+            <div class="activity-bars" id="actBars"></div>
+            <div style="margin-top:10px;font-size:11px;color:var(--text2);font-family:var(--font-mono)">
+              Bot: <span id="botCount" style="color:var(--cyan)">0</span> &nbsp;|&nbsp;
+              Uptime: <span id="uptime" style="color:var(--green)">0s</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">⚙️ Điều Khiển</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn" onclick="addBot()">➕ Thêm Bot</button>
+              <button class="btn warn" onclick="pauseBot()">⏸ Tạm dừng / Tiếp tục</button>
+              <button class="btn danger" onclick="stopBot()">⏹ Dừng Bot</button>
+              <button class="btn" onclick="exportReport()">📄 Xuất Báo Cáo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOG -->
+        <div class="panel">
+          <div class="panel-title">
+            📋 Nhật Ký
+            <button class="btn sm" onclick="clearLog()">Xóa</button>
+          </div>
+          <div class="log-body" id="logBody"></div>
+        </div>
+
+      </div>
+    </main>
+
+    <footer>
+      <span>AUTO BOT SYSTEM © 2025 — Nhấp màn hình ngoài dashboard để ghi cookie</span>
+      <div class="footer-right">
+        <span>v2.0.0</span>
+        <span id="footerTime">--:--:--</span>
+      </div>
+    </footer>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+const scene = document.getElementById('scene');
+let bots = [], savedCookies = [], actionCount = 0;
+let isRunning = true, isPaused = false;
+let mainTimer = null, uptimeVal = 0;
+let activityData = Array(20).fill(0);
+let dashVisible = true;
+window._clickCount = 0;
+
+const MAX_BOTS = 20; // cap for progress ring
+
+// ══════════════════════════════════════════
+//  COOKIE UTILS
+// ══════════════════════════════════════════
+function setCookie(name, value, days = 365) {
+  const d = new Date();
+  d.setTime(d.getTime() + days * 86400000);
+  document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/`;
+}
+function deleteCookieByName(name) {
+  document.cookie = `${encodeURIComponent(name)}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+}
+function getAllCookies() {
+  const c = {};
+  document.cookie.split(';').forEach(s => {
+    const idx = s.indexOf('=');
+    if (idx < 0) return;
+    const k = decodeURIComponent(s.slice(0, idx).trim());
+    const v = decodeURIComponent(s.slice(idx + 1).trim());
+    if (k) c[k] = v;
+  });
+  return c;
+}
+function clearAllLiveCookies() {
+  Object.keys(getAllCookies()).forEach(k => deleteCookieByName(k));
+}
+
+// ══════════════════════════════════════════
+//  SAVE / LOAD
+// ══════════════════════════════════════════
+function saveCurrentCookies(label = null) {
+  // Write state cookies
+  setCookie('bot_session_id', 'SID_' + Date.now());
+  setCookie('bot_last_action', 'save_' + actionCount);
+  setCookie('bot_status', isRunning ? (isPaused ? 'paused' : 'running') : 'stopped');
+  setCookie('bot_timestamp', new Date().toISOString());
+  setCookie('bot_action_count', String(actionCount));
+  setCookie('bot_uptime_s', String(uptimeVal));
+  setCookie('bot_count', String(bots.length));   // ← bot count persisted
+
+  const name = label || (document.getElementById('cookieName').value.trim()) || `Cookie_${new Date().toLocaleTimeString('vi-VN')}`;
+  document.getElementById('cookieName').value = '';
+
+  const obj = {
+    id: Date.now(), name,
+    timestamp: new Date().toISOString(),
+    actions: actionCount, uptime: uptimeVal,
+    botCount: bots.length,
+    cookies: getAllCookies()
+  };
+  savedCookies.push(obj);
+  persistSaved(); renderSavedList(); refreshLive();
+  addLog('💾 Lưu Cookie', `"${name}" — ${Object.keys(obj.cookies).length} cookies, ${bots.length} bot`);
+  notify(`✅ Đã lưu: ${name}`, 'ok');
+}
+
+function persistSaved() {
+  try { localStorage.setItem('savedBotCookies', JSON.stringify(savedCookies)); } catch(e) {}
+  document.getElementById('savedCount').textContent = savedCookies.length;
+  document.getElementById('statSaved').textContent = savedCookies.length;
+}
+function loadSaved() {
+  try { const d = localStorage.getItem('savedBotCookies'); if (d) savedCookies = JSON.parse(d); } catch(e) { savedCookies = []; }
+  renderSavedList();
+}
+function renderSavedList() {
+  const el = document.getElementById('cookieList');
+  if (!savedCookies.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">🗂️</div>Chưa có cookie nào được lưu</div>';
+    return;
+  }
+  el.innerHTML = savedCookies.map((it, i) => `
+    <div class="cookie-item">
+      <div class="ci-head">
+        <div class="ci-name">${escHtml(it.name)}</div>
+        <span class="ci-badge">${Object.keys(it.cookies).length}c · ${it.botCount||0}🤖</span>
+      </div>
+      <div class="ci-meta">${new Date(it.timestamp).toLocaleString('vi-VN')} &nbsp;·&nbsp; ${it.actions} acts</div>
+      <div class="ci-actions">
+        <button class="btn sm success" onclick="restoreCookies(${i})">↩ Khôi phục</button>
+        <button class="btn sm" onclick="dlOne(${i})">⬇️</button>
+        <button class="btn sm" onclick="previewCookie(${i})">🔍</button>
+        <button class="btn sm danger" onclick="delOne(${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+//  RESTORE / PREVIEW
+// ══════════════════════════════════════════
+function restoreCookies(i) {
+  const it = savedCookies[i];
+  Object.entries(it.cookies).forEach(([k, v]) => setCookie(k, v));
+  refreshLive(); updateBotCountDisplay();
+  addLog('↩ Khôi phục', `"${it.name}" — ${Object.keys(it.cookies).length} cookies`);
+  notify('✅ Đã khôi phục!', 'ok');
+}
+function previewCookie(i) {
+  const it = savedCookies[i];
+  alert(`📦 ${it.name}\n🤖 Bots lúc lưu: ${it.botCount||0}\n\n${Object.entries(it.cookies).map(([k,v])=>`${k} = ${v}`).join('\n') || '(trống)'}`);
+}
+
+// ══════════════════════════════════════════
+//  DOWNLOAD / UPLOAD
+// ══════════════════════════════════════════
+function dlOne(i) {
+  const it = savedCookies[i];
+  download(JSON.stringify(it, null, 2), it.name + '.json');
+  addLog('⬇️ Tải', `"${it.name}"`);
+}
+function downloadAll() {
+  if (!savedCookies.length) { notify('Chưa có cookie!', 'err'); return; }
+  download(JSON.stringify(savedCookies, null, 2), `AllCookies_${new Date().toISOString().slice(0,10)}.json`);
+  addLog('⬇️ Tất Cả', `${savedCookies.length} bộ`);
+}
+function download(text, filename) {
+  const b = new Blob([text], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = filename; a.click();
+  URL.revokeObjectURL(a.href);
+}
+function uploadCookies(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      const arr = Array.isArray(d) ? d : [d];
+      savedCookies = savedCookies.concat(arr);
+      persistSaved(); renderSavedList();
+      addLog('⬆️ Upload', `Nhập ${arr.length} bộ cookie`);
+      notify(`✅ Nhập ${arr.length} bộ!`, 'ok');
+    } catch { notify('❌ File không hợp lệ!', 'err'); }
+  };
+  r.readAsText(f); e.target.value = '';
+}
+function delOne(i) { savedCookies.splice(i, 1); persistSaved(); renderSavedList(); addLog('🗑 Xóa', '1 bộ cookie'); }
+function clearAllSaved() {
+  if (!savedCookies.length) { notify('Đã trống!', 'err'); return; }
+  if (!confirm('Xóa tất cả?')) return;
+  savedCookies = []; try { localStorage.removeItem('savedBotCookies'); } catch(e) {}
+  persistSaved(); renderSavedList();
+  addLog('🗑 Xóa Tất Cả', 'Đã xóa');
+}
+
+// ══════════════════════════════════════════
+//  LIVE TABLE
+// ══════════════════════════════════════════
+function refreshLive() {
+  const c = getAllCookies();
+  const keys = Object.keys(c);
+  document.getElementById('statLiveCookies').textContent = keys.length;
+  document.getElementById('hudCookies').textContent = keys.length;
+  const tb = document.getElementById('liveTable');
+  if (!keys.length) {
+    tb.innerHTML = '<tr><td colspan="3" style="color:var(--text2);text-align:center;padding:12px">Không có cookie</td></tr>';
+    return;
+  }
+  tb.innerHTML = keys.map(k => `
+    <tr>
+      <td class="td-key">${escHtml(k)}</td>
+      <td title="${escHtml(c[k])}">${escHtml(c[k].length > 38 ? c[k].slice(0,38)+'…' : c[k])}</td>
+      <td class="td-del" onclick="removeLiveCookie('${escHtml(k)}')">✕</td>
+    </tr>
+  `).join('');
+}
+function removeLiveCookie(name) { deleteCookieByName(name); refreshLive(); addLog('🗑 Xóa Cookie', name); }
+function addCustomCookie() {
+  const k = document.getElementById('newKey').value.trim();
+  const v = document.getElementById('newVal').value.trim();
+  if (!k) { notify('Nhập tên cookie!', 'err'); return; }
+  setCookie(k, v);
+  document.getElementById('newKey').value = '';
+  document.getElementById('newVal').value = '';
+  refreshLive(); addLog('➕ Cookie', `${k} = ${v||'(rỗng)'}`);
+  notify(`✅ Đã ghi: ${k}`, 'ok');
+}
+function clearAllLive() {
+  if (!confirm('Xóa tất cả cookie hiện tại?')) return;
+  clearAllLiveCookies(); refreshLive(); addLog('🗑 Xóa Live', 'Tất cả cookie');
+}
+
+// ══════════════════════════════════════════
+//  BOT COUNT DISPLAY
+// ══════════════════════════════════════════
+function updateBotCountDisplay() {
+  const n = bots.length;
+
+  // Read from cookie too
+  const c = getAllCookies();
+  const cookieCount = c['bot_count'] || String(n);
+
+  // Write current count
+  setCookie('bot_count', String(n));
+
+  // Dashboard display
+  document.getElementById('bcNumber').textContent = n;
+  document.getElementById('bcCookieVal').textContent = cookieCount;
+  const pct = Math.min(100, Math.round((n / MAX_BOTS) * 100));
+  document.getElementById('bcBar').style.width = pct + '%';
+  document.getElementById('statBots').textContent = n;
+  document.getElementById('botCount').textContent = n;
+
+  // HUD
+  document.getElementById('hudBots').textContent = n;
+
+  // Ring
+  document.getElementById('botRingNum').textContent = n;
+  const circumference = 2 * Math.PI * 88; // ~553
+  const offset = circumference - (n / MAX_BOTS) * circumference;
+  document.getElementById('ringProgress').style.strokeDashoffset = Math.max(0, offset);
+}
+
+// ══════════════════════════════════════════
+//  REPORT
+// ══════════════════════════════════════════
+function exportReport() {
+  const now = new Date();
+  const rep = {
+    generated: now.toISOString(),
+    summary: { saved: savedCookies.length, actions: actionCount, uptime: uptimeVal, bots: bots.length },
+    liveCookies: getAllCookies(),
+    savedHistory: savedCookies
+  };
+  download(JSON.stringify(rep, null, 2), `BotReport_${now.toISOString().slice(0,19).replace(/:/g,'-')}.json`);
+  addLog('📄 Báo Cáo', 'Xuất xong');
+  notify('✅ Đã xuất báo cáo!', 'ok');
+}
+
+// ══════════════════════════════════════════
+//  LOG
+// ══════════════════════════════════════════
+function addLog(action, detail) {
+  actionCount++;
+  document.getElementById('statActions').textContent = actionCount;
+  document.getElementById('hudActions').textContent = actionCount;
+  setCookie('bot_action_count', String(actionCount));
+
+  const b = document.getElementById('logBody');
+  const d = document.createElement('div');
+  d.className = 'log-entry';
+  d.innerHTML = `<span class="log-time">[${new Date().toLocaleTimeString('vi-VN')}]</span> <span class="log-action">${action}</span> <span class="log-detail">— ${detail}</span>`;
+  b.appendChild(d);
+  if (b.children.length > 60) b.removeChild(b.children[0]);
+  b.scrollTop = b.scrollHeight;
+
+  if (actionCount % 10 === 0) saveCurrentCookies(`Auto_${actionCount}`);
+
+  activityData.shift(); activityData.push(Math.min(actionCount % 20 + 1, 20));
+  renderActivityBars();
+}
+function clearLog() { document.getElementById('logBody').innerHTML = ''; addLog('🧹 Xóa Log', 'Đã xóa'); }
+
+// ══════════════════════════════════════════
+//  ACTIVITY BARS
+// ══════════════════════════════════════════
+function renderActivityBars() {
+  const container = document.getElementById('actBars');
+  const max = Math.max(...activityData, 1);
+  container.innerHTML = activityData.map((v, i) => {
+    const pct = Math.max(4, Math.round((v / max) * 100));
+    const hue = 180 + i * 4;
+    return `<div class="a-bar" style="height:${pct}%;background:hsla(${hue},100%,60%,0.5)"></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  BOTS
+// ══════════════════════════════════════════
+function createBot() {
+  const el = document.createElement('div');
+  el.className = 'bot';
+  const emojis = ['🤖','👾','🦾','🛸','🤖'];
+  el.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+  el.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+  el.style.top  = Math.random() * (window.innerHeight - 80) + 'px';
+  scene.appendChild(el);
+  bots.push(el);
+  updateBotCountDisplay();
+  moveBot(el);
+  return el;
+}
+function moveBot(el) {
+  if (!isRunning || isPaused) { setTimeout(() => moveBot(el), 500); return; }
+  const x = Math.random() * (window.innerWidth - 60);
+  const y = Math.random() * (window.innerHeight - 80);
+  const t = 1800 + Math.random() * 2400;
+  el.style.transition = `left ${t}ms ease-in-out, top ${t}ms ease-in-out`;
+  el.style.left = x + 'px'; el.style.top  = y + 'px';
+  setTimeout(() => { if (bots.includes(el)) moveBot(el); }, t + 300);
+}
+function addBot() {
+  createBot();
+  addLog('➕ Bot Mới', `Tổng ${bots.length} bot`);
+}
+function pauseBot() {
+  isPaused = !isPaused;
+  const dot = document.getElementById('pulse');
+  const txt = document.getElementById('statusText');
+  if (isPaused) {
+    dot.style.background = 'var(--warn)'; txt.textContent = 'PAUSED';
+    addLog('⏸ Tạm dừng', 'Bot đã dừng');
+  } else {
+    dot.style.background = 'var(--green)'; txt.textContent = 'RUNNING';
+    bots.forEach(b => moveBot(b));
+    addLog('▶️ Tiếp tục', 'Bot hoạt động');
+  }
+}
+function stopBot() {
+  if (!isRunning) return;
+  isRunning = false; clearInterval(mainTimer);
+  document.getElementById('pulse').style.cssText = 'background:var(--danger);animation:none';
+  document.getElementById('statusText').textContent = 'STOPPED';
+  document.getElementById('toggleDot').style.background = 'var(--danger)';
+  saveCurrentCookies('Cookie_Trước_Khi_Dừng');
+  addLog('⏹ Dừng', `${actionCount} hành động | ${uptimeVal}s`);
+  notify('Bot đã dừng. Cookie đã lưu.', 'ok');
+}
+
+// ══════════════════════════════════════════
+//  DASHBOARD TOGGLE
+// ══════════════════════════════════════════
+function toggleDashboard() {
+  dashVisible = !dashVisible;
+  const dash = document.getElementById('dashboard');
+  const icon = document.getElementById('toggleIcon');
+  const lbl  = document.getElementById('toggleLabel');
+  const hud  = document.getElementById('liveHud');
+  const ring = document.getElementById('botRing');
+
+  if (dashVisible) {
+    dash.classList.remove('hidden');
+    icon.textContent = '📊';
+    lbl.textContent = 'DASHBOARD';
+    hud.style.opacity = '0'; hud.style.pointerEvents = 'none';
+    ring.style.opacity = '0';
+  } else {
+    dash.classList.add('hidden');
+    icon.textContent = '👁';
+    lbl.textContent = 'HIỆN DASHBOARD';
+    hud.style.opacity = '1'; hud.style.pointerEvents = 'none';
+    ring.style.opacity = '1';
+  }
+
+  setCookie('dash_visible', dashVisible ? '1' : '0');
+  addLog(dashVisible ? '📊 Dashboard Mở' : '👁 Dashboard Ẩn', 'Chế độ xem thay đổi');
+}
+
+// ══════════════════════════════════════════
+//  NOTIFICATIONS
+// ══════════════════════════════════════════
+function notify(msg, type = '') {
+  const el = document.createElement('div');
+  el.className = 'notif ' + type;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2700);
+}
+
+// ══════════════════════════════════════════
+//  CLICK → COOKIE (outside dashboard)
+// ══════════════════════════════════════════
+document.addEventListener('click', e => {
+  if (!isRunning || isPaused) return;
+  if (e.target.closest('#dashboard, #toggleBtn')) return;
+  const x = e.clientX, y = e.clientY;
+  window._clickCount++;
+  setCookie('bot_last_click_x', String(x));
+  setCookie('bot_last_click_y', String(y));
+  setCookie('bot_click_time', new Date().toISOString());
+  setCookie('bot_click_count', String(window._clickCount));
+  const sp = document.createElement('div');
+  sp.className = 'spark';
+  sp.style.left = x + 'px'; sp.style.top = y + 'px';
+  document.body.appendChild(sp);
+  setTimeout(() => sp.remove(), 600);
+  refreshLive();
+  addLog('🖱 Click', `(${x}, ${y}) — cookie ghi`);
+});
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════
+//  CLOCK + UPTIME
+// ══════════════════════════════════════════
+setInterval(() => {
+  document.getElementById('footerTime').textContent = new Date().toLocaleTimeString('vi-VN');
+  if (isRunning && !isPaused) {
+    uptimeVal++;
+    document.getElementById('uptime').textContent = uptimeVal + 's';
+    document.getElementById('hudUptime').textContent = uptimeVal + 's';
+    setCookie('bot_uptime_s', String(uptimeVal));
+  }
+}, 1000);
+
+// ══════════════════════════════════════════
+//  AUTO BOT LOOP
+// ══════════════════════════════════════════
+function startAutoLoop() {
+  mainTimer = setInterval(() => {
+    if (!isRunning || isPaused) return;
+    if (Math.random() < 0.55) {
+      const msgs = [
+        'Di chuyển và cập nhật cookie', 'Quét môi trường',
+        'Đồng bộ trạng thái bot', 'Gia hạn cookie phiên', 'Tác vụ nền hoàn thành'
+      ];
+      addLog('⚙️ Auto', msgs[Math.floor(Math.random() * msgs.length)]);
+    }
+    if (bots.length && Math.random() < 0.35) {
+      const b = bots[Math.floor(Math.random() * bots.length)];
+      const h = Math.random() * 360;
+      b.style.background = `radial-gradient(circle at 35% 35%, hsl(${h},100%,70%), hsl(${h+60},100%,35%))`;
+    }
+    refreshLive();
+    updateBotCountDisplay();
+  }, 2000);
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+window.onload = function() {
+  loadSaved();
+  renderActivityBars();
+
+  // Restore dash visibility from cookie
+  const c = getAllCookies();
+  if (c['dash_visible'] === '0') {
+    // start hidden
+    setTimeout(toggleDashboard, 100);
+  }
+
+  // Spawn bots
+  for (let i = 0; i < 5; i++) setTimeout(createBot, i * 300);
+
+  startAutoLoop();
+  refreshLive();
+  addLog('🚀 Khởi động', 'Auto Bot v2.0 sẵn sàng');
+  setTimeout(() => saveCurrentCookies('Cookie_Khi_Mở_Trang'), 1500);
+};
+</script>
+</body>
+</html>
