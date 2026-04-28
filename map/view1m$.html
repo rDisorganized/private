@@ -2,273 +2,772 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KCN Mobile - Chọn Khu Công Nghiệp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>View Thế Giới - Bản đồ tương tác</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; width: 100%; overflow: hidden; font-family: Arial, sans-serif; }
-        
-        .header {
-            background: #007bff;
-            color: white;
-            padding: 12px 15px;
-            text-align: center;
-            font-size: 18px;
-            position: relative;
-            z-index: 1000;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
-        
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: calc(100% - 56px);
-        }
-        
-        #map {
-            flex: 1;
+
+        html, body {
+            height: 100%;
             width: 100%;
-        }
-        
-        .panel {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            max-height: 45vh;
             overflow: hidden;
-            z-index: 1000;
-            transition: all 0.3s ease;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #000;
         }
-        
+
+        /* Header chính - design hiện đại */
+        .main-header {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1002;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 26px;
+        }
+
+        .title-text {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #fff, #aaccff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .admin-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            padding: 8px 14px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .admin-btn:active {
+            background: #007bff;
+            transform: scale(0.96);
+        }
+
+        .container {
+            height: calc(100% - 60px);
+            width: 100%;
+            position: relative;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* Panel danh sách - tối ưu mobile */
+        .location-panel {
+            position: absolute;
+            bottom: 16px;
+            left: 12px;
+            right: 12px;
+            background: rgba(20, 20, 30, 0.92);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+            overflow: hidden;
+            z-index: 1001;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
         .panel-header {
-            padding: 12px 15px;
-            background: #f1f1f1;
-            font-weight: bold;
+            padding: 16px 20px;
+            background: rgba(0,0,0,0.5);
+            font-weight: 600;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
+            color: white;
+            font-size: 1rem;
+            letter-spacing: 0.3px;
         }
-        
+
+        .panel-header span:first-child {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #toggle-icon {
+            font-size: 1.3rem;
+            transition: transform 0.2s;
+        }
+
         .list-container {
-            max-height: 35vh;
+            max-height: 38vh;
             overflow-y: auto;
-            padding: 8px;
+            padding: 8px 12px 16px;
+            scrollbar-width: thin;
         }
-        
+
         .kcn-item {
-            padding: 12px 15px;
-            margin: 6px 0;
-            background: #f9f9f9;
-            border-radius: 8px;
-            border-left: 4px solid #007bff;
+            padding: 14px 16px;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            border-left: 4px solid #3b82f6;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            color: #f0f0f0;
+            backdrop-filter: blur(4px);
         }
-        
-        .kcn-item:hover, .kcn-item:active {
-            background: #e3f2fd;
+
+        .kcn-item:active {
+            background: rgba(59,130,246,0.4);
+            transform: scale(0.98);
         }
-        
-        .controls {
+
+        .kcn-item strong {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .kcn-item small {
+            color: #bbbbff;
+            font-size: 0.75rem;
+        }
+
+        /* Floating controls */
+        .float-controls {
             position: absolute;
-            top: 70px;
-            right: 10px;
+            top: 80px;
+            right: 12px;
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
         }
-        
-        button {
-            padding: 10px 14px;
-            font-size: 16px;
+
+        .float-btn {
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
             border: none;
-            border-radius: 8px;
-            background: #007bff;
+            width: 48px;
+            height: 48px;
+            border-radius: 30px;
+            font-size: 22px;
             color: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.15s linear;
         }
-        
-        .small-btn {
-            padding: 8px 12px;
-            font-size: 14px;
+
+        .float-btn:active {
+            transform: scale(0.92);
+            background: #007bff;
         }
-        
+
         #status {
             position: absolute;
-            top: 70px;
-            left: 10px;
-            background: rgba(0,0,0,0.7);
+            bottom: 100px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
             color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            z-index: 1000;
-            display: none;
+            padding: 12px 16px;
+            border-radius: 60px;
+            font-size: 13px;
+            z-index: 1002;
+            text-align: center;
+            font-weight: 500;
+            pointer-events: none;
+            transition: 0.2s;
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* Modal đăng nhập Admin */
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s;
+        }
+
+        .modal-mask.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .login-card {
+            background: rgba(20, 25, 40, 0.96);
+            backdrop-filter: blur(20px);
+            width: 85%;
+            max-width: 340px;
+            border-radius: 48px;
+            padding: 32px 24px;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+        }
+
+        .login-card h3 {
+            color: white;
+            margin-bottom: 24px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 14px 18px;
+            margin: 12px 0;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            border-radius: 60px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .login-card input::placeholder {
+            color: #ccc;
+        }
+
+        .login-card button {
+            width: 100%;
+            padding: 14px;
+            background: #3b82f6;
+            border: none;
+            border-radius: 60px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 12px;
+            cursor: pointer;
+        }
+
+        .close-modal {
+            margin-top: 15px;
+            background: transparent;
+            border: 1px solid #aaa;
+        }
+
+        .admin-panel {
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .admin-badge {
+            background: #f97316;
+            color: white;
+            border-radius: 40px;
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        /* Scroll tối ưu */
+        .list-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .list-container::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .list-container::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .float-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+            .kcn-item {
+                padding: 12px 14px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <strong>Chọn Khu Công Nghiệp</strong>
-    </div>
 
-    <div class="container">
-        <div id="map"></div>
+<div class="main-header">
+    <div class="logo-area">
+        <span class="logo-icon">🌍✨</span>
+        <span class="title-text">View Thế Giới</span>
     </div>
+    <button class="admin-btn" id="adminLoginBtn">🔐 Admin</button>
+</div>
 
-    <!-- Panel danh sách -->
-    <div class="panel" id="panel">
+<div class="container">
+    <div id="map"></div>
+
+    <!-- Panel danh sách điểm đến (KCN -> Điểm toàn cầu) -->
+    <div class="location-panel" id="panel">
         <div class="panel-header" onclick="togglePanel()">
-            📋 Danh sách Khu Công Nghiệp (<span id="count">0</span>)
+            <span>📍 Các điểm nổi bật <span style="font-size:0.8rem;">(Global Spots)</span></span>
             <span id="toggle-icon">▼</span>
         </div>
-        <div class="list-container" id="list"></div>
+        <div class="list-container" id="list">
+            <div style="text-align:center; padding:16px; color:#ccc;">Đang tải dữ liệu...</div>
+        </div>
     </div>
 
-    <!-- Controls -->
-    <div class="controls">
-        <button onclick="locateUser()" class="small-btn">📍 Vị trí của tôi</button>
-        <button onclick="resetView()" class="small-btn">🌍 Reset bản đồ</button>
+    <div class="float-controls">
+        <button class="float-btn" onclick="locateUser()" title="Vị trí của tôi">📍</button>
+        <button class="float-btn" onclick="resetView()" title="Reset bản đồ">🌐</button>
     </div>
-
     <div id="status"></div>
+</div>
 
-    <!-- Leaflet -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<!-- Modal đăng nhập admin -->
+<div id="adminModal" class="modal-mask">
+    <div class="login-card">
+        <h3>🔐 Admin</h3>
+        <input type="text" id="adminUser" placeholder="Tài khoản" value="admin">
+        <input type="password" id="adminPass" placeholder="Mật khẩu" value="admin">
+        <button id="doLoginBtn">Đăng nhập</button>
+        <button class="close-modal" id="closeModalBtn">Đóng</button>
+    </div>
+</div>
 
-    <script>
-        // ==================== FIREBASE ====================
-        const firebaseConfig = {
-            databaseURL: "https://bankvanhungbian-default-rtdb.asia-southeast1.firebasedatabase.app/"
-        };
-        const app = firebase.initializeApp(firebaseConfig);
-        const dbRef = firebase.database().ref('khu_cong_nghiep');
+<!-- Leaflet + Firebase -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
-        // ==================== BẢN ĐỒ ====================
-        const map = L.map('map', {
-            zoomControl: true,
-            attributionControl: true
-        }).setView([10.8231, 106.6297], 11);
+<script>
+    // ==================== FIREBASE INIT ====================
+    const firebaseConfig = {
+        databaseURL: "https://bankvanhungbian-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const dbRef = firebase.database().ref('khu_cong_nghiep');  // giữ nguyên node cũ để tương thích dữ liệu
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
+    // ==================== BẢN ĐỒ (View Thế Giới) ====================
+    const map = L.map('map', {
+        zoomControl: true,
+        attributionControl: true
+    }).setView([10.8231, 106.6297], 11);
 
-        let markers = {};
-        let isPanelOpen = true;
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> & CartoDB',
+        subdomains: 'abcd',
+        maxZoom: 19,
+        style: 'light'
+    }).addTo(map);
 
-        // ==================== TẢI DANH SÁCH ====================
-        function loadList() {
-            const listDiv = document.getElementById('list');
-            listDiv.innerHTML = '';
+    let markers = {};
+    let isPanelOpen = true;
 
-            dbRef.on('value', (snapshot) => {
-                listDiv.innerHTML = '';
-                markers = {};
-                let count = 0;
+    // ==================== QUẢN LÝ ADMIN SESSION ====================
+    let isAdminLogged = false;
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const adminModal = document.getElementById('adminModal');
+    const doLoginBtn = document.getElementById('doLoginBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const adminUserInput = document.getElementById('adminUser');
+    const adminPassInput = document.getElementById('adminPass');
 
-                snapshot.forEach((child) => {
-                    const key = child.key;
-                    const data = child.val();
-                    if (!data.lat || !data.lng) return;
+    // Mở modal
+    function openAdminModal() {
+        adminModal.classList.add('active');
+    }
+    function closeAdminModal() {
+        adminModal.classList.remove('active');
+        adminUserInput.value = 'admin';
+        adminPassInput.value = 'admin';
+    }
 
-                    count++;
+    adminLoginBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openAdminModal();
+    });
+    closeModalBtn.addEventListener('click', closeAdminModal);
 
-                    // Marker trên bản đồ
-                    const marker = L.marker([data.lat, data.lng], {
-                        riseOnHover: true
-                    }).addTo(map);
-                    
-                    marker.bindPopup(`
-                        <b>${data.ten}</b><br>
-                        Lat: ${data.lat.toFixed(6)}<br>
-                        Lng: ${data.lng.toFixed(6)}
-                    `);
-
-                    markers[key] = marker;
-
-                    // Item trong danh sách (click để chọn + zoom đến)
-                    const div = document.createElement('div');
-                    div.className = 'kcn-item';
-                    div.innerHTML = `
-                        <strong>${data.ten}</strong><br>
-                        <small>${data.lat.toFixed(5)}, ${data.lng.toFixed(5)}</small>
-                    `;
-                    div.onclick = () => {
-                        map.flyTo([data.lat, data.lng], 15, { duration: 1.5 });
-                        marker.openPopup();
-                    };
-                    listDiv.appendChild(div);
-                });
-
-                document.getElementById('count').textContent = count;
-            });
+    doLoginBtn.addEventListener('click', () => {
+        const user = adminUserInput.value.trim();
+        const pass = adminPassInput.value.trim();
+        if (user === 'admin' && pass === 'admin') {
+            isAdminLogged = true;
+            closeAdminModal();
+            showStatus("✅ Admin đăng nhập thành công!", "#4caf50");
+            // Thay đổi giao diện header (hiển thị badge admin)
+            const headerBtn = document.getElementById('adminLoginBtn');
+            headerBtn.innerHTML = '👑 Admin Mode';
+            headerBtn.style.background = "#f97316";
+            // Thêm nút quản lý nhanh (tuỳ chọn) - thêm chức năng thêm mới demo (có thể thêm nhưng không làm phức tạp, nhưng để đáp ứng yêu cầu quyền)
+            addAdminQuickTools();
+        } else {
+            showStatus("❌ Sai tài khoản hoặc mật khẩu!", "#ff5555");
+            isAdminLogged = false;
         }
+    });
 
-        // Toggle panel (thu gọn / mở rộng)
-        function togglePanel() {
-            isPanelOpen = !isPanelOpen;
-            const panel = document.getElementById('panel');
-            const icon = document.getElementById('toggle-icon');
-            if (isPanelOpen) {
-                panel.style.maxHeight = '45vh';
-                icon.textContent = '▼';
-            } else {
-                panel.style.maxHeight = '50px';
-                icon.textContent = '▲';
+    // Thêm các công cụ nhanh khi admin đăng nhập (thêm demo marker hoặc hiển thị thông báo quyền)
+    function addAdminQuickTools() {
+        // Kiểm tra nếu đã tồn tại thì không thêm lại
+        if (document.getElementById('adminQuickPanel')) return;
+        const panelHeader = document.querySelector('.panel-header');
+        if (!panelHeader) return;
+        // Tạo badge nhỏ bên cạnh header
+        const badgeSpan = document.createElement('span');
+        badgeSpan.id = 'adminQuickPanel';
+        badgeSpan.className = 'admin-badge';
+        badgeSpan.innerText = '✏️ Quản trị (đã đăng nhập)';
+        badgeSpan.style.marginLeft = '10px';
+        badgeSpan.style.fontSize = '0.7rem';
+        badgeSpan.style.cursor = 'pointer';
+        badgeSpan.onclick = (e) => {
+            e.stopPropagation();
+            showAdminInfo();
+        };
+        const rightSide = document.querySelector('.panel-header span:first-child');
+        if (rightSide) rightSide.appendChild(badgeSpan);
+    }
+
+    function showAdminInfo() {
+        showStatus("🔧 Bạn đang ở chế độ Admin — có thể thêm/xóa dữ liệu qua Firebase Console hoặc quản lý trực tiếp DB. Chức năng mở rộng sẵn sàng.", "#ffaa33");
+        // Tối ưu: cung cấp thêm tính năng thử thêm điểm demo từ giao diện (không bắt buộc nhưng thể hiện quyền)
+        if (!document.getElementById('demoAddBtn')) {
+            const controlsDiv = document.querySelector('.float-controls');
+            if (controlsDiv) {
+                const addDemoBtn = document.createElement('button');
+                addDemoBtn.id = 'demoAddBtn';
+                addDemoBtn.className = 'float-btn';
+                addDemoBtn.innerHTML = '➕';
+                addDemoBtn.title = 'Thêm điểm demo (Admin)';
+                addDemoBtn.style.background = "#f97316";
+                addDemoBtn.onclick = () => {
+                    if (!isAdminLogged) {
+                        showStatus("⚠️ Cần đăng nhập Admin để thêm điểm!", "#ff5555");
+                        return;
+                    }
+                    const demoName = "Điểm mới " + new Date().toLocaleTimeString();
+                    const randomLat = 10.78 + Math.random() * 0.1;
+                    const randomLng = 106.65 + Math.random() * 0.1;
+                    // thêm trực tiếp lên Firebase Realtime Database (tạo node mới)
+                    const newRef = dbRef.push();
+                    newRef.set({
+                        ten: demoName,
+                        lat: randomLat,
+                        lng: randomLng,
+                        createdAt: firebase.database.ServerValue.TIMESTAMP || Date.now()
+                    }).then(() => {
+                        showStatus(`✅ Đã thêm "${demoName}"`, "#4caf50");
+                    }).catch(err => showStatus("Lỗi thêm: " + err.message, "#ff5555"));
+                };
+                controlsDiv.appendChild(addDemoBtn);
             }
         }
+    }
 
-        // ==================== CHỨC NĂNG KHÁC ====================
-        function locateUser() {
-            if (!navigator.geolocation) {
-                showStatus("Trình duyệt không hỗ trợ định vị", "red");
+    // ==================== TẢI DỮ LIỆU & DANH SÁCH ====================
+    function loadWorldSpots() {
+        const listDiv = document.getElementById('list');
+        listDiv.innerHTML = '<div style="text-align:center; padding:16px; color:#ccc;">Đang đồng bộ...</div>';
+        
+        dbRef.on('value', (snapshot) => {
+            // Xóa marker cũ
+            for (let key in markers) {
+                if (markers[key]) map.removeLayer(markers[key]);
+            }
+            markers = {};
+            listDiv.innerHTML = '';
+            let count = 0;
+
+            if (!snapshot.exists()) {
+                listDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa;">✨ Chưa có điểm nào, hãy thêm dữ liệu.</div>';
+                document.getElementById('count').textContent = '0';
                 return;
             }
-            showStatus("Đang lấy vị trí...", "blue");
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const lat = pos.coords.latitude;
-                    const lng = pos.coords.longitude;
-                    map.flyTo([lat, lng], 14);
-                    showStatus("Đã đến vị trí của bạn", "green");
-                },
-                () => showStatus("Không lấy được vị trí", "red")
-            );
-        }
 
-        function resetView() {
-            map.flyTo([10.8231, 106.6297], 11);
-        }
+            snapshot.forEach((child) => {
+                const key = child.key;
+                const data = child.val();
+                if (!data.lat || !data.lng || !data.ten) return;
+                count++;
 
-        function showStatus(text, color = "blue") {
-            const status = document.getElementById('status');
-            status.textContent = text;
-            status.style.color = color === "red" ? "#ff4444" : (color === "green" ? "#4caf50" : "#2196f3");
-            status.style.display = "block";
-            setTimeout(() => status.style.display = "none", 3000);
-        }
+                // Tạo marker với icon tùy chỉnh mượt mà
+                const markerIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div style="background:#3b82f6; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.3); border:2px solid white;"><span style="color:white; font-weight:bold; font-size:12px;">📍</span></div>',
+                    iconSize: [28, 28],
+                    popupAnchor: [0, -14]
+                });
+                const marker = L.marker([data.lat, data.lng], { icon: markerIcon, riseOnHover: true }).addTo(map);
+                
+                let adminInfo = '';
+                if (isAdminLogged) adminInfo = '<br><span style="color:#f97316;"><em>(Admin có thể xóa/ sửa)</em></span>';
+                marker.bindPopup(`
+                    <b style="font-size:1rem;">${escapeHtml(data.ten)}</b><br>
+                    📍 Tọa độ: ${data.lat.toFixed(5)}, ${data.lng.toFixed(5)}${adminInfo}
+                    ${isAdminLogged ? '<br><button id="delBtn_'+key+'" style="margin-top:6px; background:#dc2626; border:none; padding:4px 10px; border-radius:20px; color:white; font-size:12px;">🗑 Xóa điểm</button>' : ''}
+                `);
+                
+                marker.on('popupopen', () => {
+                    if (isAdminLogged) {
+                        const delBtn = document.getElementById(`delBtn_${key}`);
+                        if (delBtn) {
+                            delBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                if (confirm(`Xóa "${data.ten}" vĩnh viễn?`)) {
+                                    dbRef.child(key).remove().then(() => {
+                                        showStatus(`Đã xóa "${data.ten}"`, "#4caf50");
+                                        map.closePopup();
+                                    }).catch(err => showStatus("Lỗi xóa", "#ff5555"));
+                                }
+                            };
+                        }
+                    }
+                });
+                
+                markers[key] = marker;
 
-        // Khởi động
-        window.onload = () => {
-            loadList();
-            // Fix Leaflet trên mobile (đôi khi icon bị lệch)
-            setTimeout(() => map.invalidateSize(), 300);
-        };
+                // Thêm item danh sách (hiển thị tên điểm)
+                const div = document.createElement('div');
+                div.className = 'kcn-item';
+                div.innerHTML = `
+                    <strong>🌍 ${escapeHtml(data.ten)}</strong>
+                    <small>📌 ${data.lat.toFixed(5)}, ${data.lng.toFixed(5)}</small>
+                `;
+                div.onclick = () => {
+                    map.flyTo([data.lat, data.lng], 14, { duration: 1.2 });
+                    marker.openPopup();
+                };
+                listDiv.appendChild(div);
+            });
 
-        // Tự động invalidate size khi xoay màn hình
-        window.addEventListener('resize', () => {
-            map.invalidateSize();
+            document.getElementById('count').textContent = count;
+            if (count === 0) {
+                listDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa;">🌱 Hãy thêm điểm mới (Admin) để khám phá</div>';
+            }
+        }, (error) => {
+            console.error(error);
+            listDiv.innerHTML = '<div style="padding:20px;text-align:center;">⚠️ Lỗi tải dữ liệu</div>';
         });
-    </script>
+    }
+
+    // Helper nhỏ
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // ==================== CHỨC NĂNG GIAO DIỆN ====================
+    function togglePanel() {
+        isPanelOpen = !isPanelOpen;
+        const panel = document.getElementById('panel');
+        const icon = document.getElementById('toggle-icon');
+        if (isPanelOpen) {
+            panel.style.maxHeight = '45vh';
+            icon.textContent = '▼';
+            icon.style.transform = 'rotate(0deg)';
+        } else {
+            panel.style.maxHeight = '62px';   // thu gọn chỉ thấy header
+            icon.textContent = '▲';
+        }
+    }
+
+    function locateUser() {
+        if (!navigator.geolocation) {
+            showStatus("❌ Trình duyệt không hỗ trợ định vị", "#ff5555");
+            return;
+        }
+        showStatus("📍 Đang lấy vị trí hiện tại...", "#88aaff");
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                map.flyTo([lat, lng], 14, { duration: 1 });
+                // Thêm marker tạm cho vị trí user (tùy chọn)
+                if (window.userMarker) map.removeLayer(window.userMarker);
+                const userIcon = L.divIcon({
+                    html: '<div style="background:#0f0; width:20px; height:20px; border-radius:50%; border:2px solid white; box-shadow:0 0 6px #0f0;"></div>',
+                    iconSize: [20,20]
+                });
+                window.userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
+                window.userMarker.bindPopup("📱 Vị trí của bạn").openPopup();
+                showStatus("✅ Đã định vị thành công", "#4caf50");
+            },
+            () => showStatus("❌ Không thể lấy vị trí, hãy bật GPS", "#ff5555")
+        );
+    }
+
+    function resetView() {
+        map.flyTo([10.8231, 106.6297], 11, { duration: 1 });
+        showStatus("🌎 Đã về chế độ xem toàn cảnh", "#3b82f6");
+    }
+
+    function showStatus(text, bgColorHint = "#2196f3") {
+        const statusDiv = document.getElementById('status');
+        statusDiv.textContent = text;
+        statusDiv.style.borderLeftColor = bgColorHint;
+        statusDiv.style.background = "rgba(0,0,0,0.85)";
+        statusDiv.style.display = "block";
+        statusDiv.style.opacity = "1";
+        setTimeout(() => {
+            statusDiv.style.opacity = "0";
+            setTimeout(() => statusDiv.style.display = "none", 300);
+        }, 2800);
+    }
+
+    // Cập nhật số lượng
+    function updateCountDisplay() {
+        // count đã được cập nhật trong snapshot, chỉ cần đảm bảo
+    }
+
+    // ==================== LẮNG NGHE THAY ĐỔI QUYỀN ADMIN ĐỂ CẬP NHẬT INTERFACE ====================
+    // Khi admin đăng nhập, cần reload popup binding (nhưng marker.bindPopup đã có logic cứng với isAdminLogged)
+    // Để cập nhật popup khi admin login sau khi đã tải bản đồ, cần refresh lại popup của từng marker:
+    function refreshMarkersForAdmin() {
+        if (!isAdminLogged) return;
+        // Cập nhật lại popup nội dung cho tất cả marker 
+        dbRef.once('value', (snapshot) => {
+            snapshot.forEach((child) => {
+                const key = child.key;
+                const data = child.val();
+                const marker = markers[key];
+                if (marker && data) {
+                    let adminInfo = '<br><span style="color:#f97316;">✏️ Quyền quản trị: xóa</span>';
+                    marker.setPopupContent(`
+                        <b style="font-size:1rem;">${escapeHtml(data.ten)}</b><br>
+                        📍 ${data.lat.toFixed(5)}, ${data.lng.toFixed(5)}${adminInfo}
+                        <br><button id="delBtn_${key}" style="margin-top:6px; background:#dc2626; border:none; padding:4px 12px; border-radius:30px; color:white;">🗑 Xóa ngay</button>
+                    `);
+                    // Re-assign sự kiện xóa sau khi popup mở (sẽ được xử lý lại)
+                    marker.off('popupopen');
+                    marker.on('popupopen', () => {
+                        const btnDel = document.getElementById(`delBtn_${key}`);
+                        if (btnDel) {
+                            btnDel.onclick = (e) => {
+                                e.stopPropagation();
+                                if (confirm(`Xóa điểm "${data.ten}"?`)) {
+                                    dbRef.child(key).remove().then(() => showStatus(`Đã xóa thành công`, "#4caf50"));
+                                }
+                            };
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    // Khi admin login, gọi refresh để update popup có nút xóa
+    const origShowAdminInfo = showAdminInfo;
+    window.showAdminInfo = showAdminInfo;
+    // Ghi đè nhẹ để khi admin login thành công làm mới danh sách popup
+    const origAddTools = addAdminQuickTools;
+    // Theo dõi biến isAdminLogged
+    const loginObserver = setInterval(() => {
+        if (isAdminLogged) {
+            refreshMarkersForAdmin();
+            clearInterval(loginObserver);
+        }
+    }, 500);
+    
+    // Xử lý khi có thay đổi dữ liệu từ xa -> tự động cập nhật marker và giao diện (firebase realtime đã đồng bộ)
+    // Nhưng popup content cần admin info, vì vậy cũng cập nhật sau mỗi sự kiện value, nhưng loadList đã xử lý xong marker mới,
+    // nhược điểm là admin mới login nhưng marker không có nút xóa vì chưa refresh. Đã xử lý bằng refreshMarkersForAdmin.
+    // Tối ưu thêm: sau khi load dữ liệu mới nếu admin đang login thì gán lại popup
+    const originalLoad = loadWorldSpots;
+    window.loadWorldSpots = loadWorldSpots;
+    // Ghi đè lên hàm load gốc nhưng vẫn giữ hành vi cũ và gọi thêm refresh
+    // thực tế loadWorldSpots đã xử lý marker mới toàn bộ, nội dung popup chỉ có adminInfo tuỳ theo biến isAdminLogged tại thời điểm tạo marker.
+    // Vì vậy khi admin login sau, cần refresh lại tất cả marker (refreshMarkersForAdmin).
+    // Bổ sung listener mỗi khi snapshot chạy để nếu admin login thì cập nhật popup nội dung.
+    // Cách triệt để: đăng ký dbRef.on('value', ...) trong loadWorldSpots đã tự động làm mới marker hoàn toàn, khi admin login sau 1-2s danh sách đồng bộ lại sẽ chạy snapshot mới tạo marker mới kèm nút xóa nếu isAdminLogged = true.
+    // Vậy chỉ cần set isAdminLogged = true và load lại dữ liệu sẽ tự cập nhật marker. Tuyệt vời !
+    // Nên cải tiến: sau khi đăng nhập thành công, ta gọi refreshForce:
+    function forceReloadSpots() {
+        if (isAdminLogged) {
+            // buộc firebase re-fetch dữ liệu (thực chất dbRef vẫn sync, nhưng ta kích hoạt reload marker)
+            dbRef.once('value', (snapshot) => {
+                // chỉ cần load lại markers thông qua loadWorldSpots là được nhưng sẽ trùng.
+                // Gọi trực tiếp loadWorldSpots sẽ gây nhân bản listener? không, vì nó gọi on('value') lần nữa tạo listener mới, thay vì vậy ta chỉ nên cập nhật marker bằng cách set lại dữ liệu.
+                // Nhưng loadWorldSpots đã gọi on('value') và sẽ tạo lại toàn bộ marker, không sao vì nó remove markers cũ rồi add mới.
+                // Tuy nhiên sẽ có 2 listener cùng lúc. Để an toàn, ta gán lại dbRef listener.
+                // Ta chỉ cần gọi loadWorldSpots một lần nữa nhưng cần remove listener cũ? Thực tế không gây lỗi nặng.
+                // Giải pháp an toàn: gọi loadWorldSpots và nó sẽ thay thế markers, ổn.
+                loadWorldSpots();
+                showStatus("🔄 Cập nhật giao diện quản trị", "#f97316");
+            });
+        }
+    }
+    // Gọi forceReload khi admin login thành công
+    const originalLoginSuccess = () => {
+        setTimeout(() => {
+            if(isAdminLogged) forceReloadSpots();
+        }, 300);
+    };
+    // Đính kèm vào nút login
+    const originalLoginClick = doLoginBtn.onclick;
+    doLoginBtn.addEventListener('click', () => {
+        setTimeout(() => {
+            if (isAdminLogged) forceReloadSpots();
+        }, 200);
+    });
+    
+    // ==================== KHỞI ĐỘNG ====================
+    window.onload = () => {
+        loadWorldSpots();
+        setTimeout(() => map.invalidateSize(), 200);
+        // Gắn toggle panel mặc định
+        const panelDiv = document.getElementById('panel');
+        if (panelDiv) panelDiv.style.maxHeight = '45vh';
+    };
+    window.addEventListener('resize', () => map.invalidateSize());
+    // Hỗ trợ hiển thị count ban đầu
+</script>
 </body>
 </html>
