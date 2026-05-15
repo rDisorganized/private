@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Danh Sách Công Ty Bảo Vệ</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080a0c;
+    --deep: #0d1117;
+    --panel: #111820;
+    --border: #1e2d3d;
+    --gold: #c8a84b;
+    --gold-bright: #f0c94a;
+    --gold-dim: #6b5a27;
+    --red: #c0392b;
+    --green: #27ae60;
+    --text: #a8b8c8;
+    --text-bright: #ddeeff;
+    --mono: 'Share Tech Mono', monospace;
+    --title: 'Bebas Neue', sans-serif;
+    --body: 'Barlow Condensed', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: var(--body);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* Grid background */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(200,168,75,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,168,75,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 32px 40px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    background: linear-gradient(180deg, rgba(13,17,23,0.98) 0%, transparent 100%);
+  }
+
+  .header-left {}
+
+  .shield-icon {
+    font-size: 18px;
+    color: var(--gold);
+    letter-spacing: 3px;
+    font-family: var(--mono);
+    display: block;
+    margin-bottom: 4px;
+    animation: pulse-gold 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-gold {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  h1 {
+    font-family: var(--title);
+    font-size: clamp(36px, 5vw, 72px);
+    letter-spacing: 4px;
+    line-height: 1;
+    color: var(--text-bright);
+    text-shadow: 0 0 40px rgba(200,168,75,0.3);
+  }
+
+  h1 span { color: var(--gold); }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--gold-dim);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  .header-right {
+    text-align: right;
+  }
+
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(192,57,43,0.15);
+    border: 1px solid rgba(192,57,43,0.4);
+    padding: 6px 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #e74c3c;
+    margin-bottom: 8px;
+  }
+
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #e74c3c;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  .clock {
+    font-family: var(--mono);
+    font-size: 22px;
+    color: var(--gold);
+    letter-spacing: 3px;
+  }
+
+  .date-display {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  /* ── Stats Bar ── */
+  .stats-bar {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat {
+    flex: 1;
+    padding: 14px 24px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat:last-child { border-right: none; }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    font-family: var(--title);
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--gold-bright);
+    line-height: 1;
+  }
+
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+
+  /* ── Controls ── */
+  .controls {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 40px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+    max-width: 380px;
+  }
+
+  .search-box input {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text-bright);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 10px 16px 10px 40px;
+    letter-spacing: 1px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-box input:focus { border-color: var(--gold); }
+  .search-box input::placeholder { color: var(--gold-dim); }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold-dim);
+    font-size: 14px;
+  }
+
+  .btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(200,168,75,0.06);
+  }
+
+  .btn.active {
+    border-color: var(--gold);
+    color: var(--black);
+    background: var(--gold);
+  }
+
+  .sort-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--gold-dim);
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+
+  .speed-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .speed-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--gold-dim);
+    letter-spacing: 2px;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 80px;
+    height: 2px;
+    background: var(--border);
+    outline: none;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--gold);
+    cursor: pointer;
+  }
+
+  /* ── Ticker ── */
+  .ticker-wrap {
+    position: relative;
+    z-index: 10;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    height: 36px;
+    display: flex;
+    align-items: center;
+  }
+
+  .ticker-track {
+    display: flex;
+    gap: 0;
+    white-space: nowrap;
+    animation: scroll-left 60s linear infinite;
+  }
+
+  .ticker-track:hover { animation-play-state: paused; }
+
+  @keyframes scroll-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 28px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text);
+    border-right: 1px solid var(--border);
+  }
+
+  .ticker-item .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* ── Main Grid ── */
+  .main {
+    position: relative;
+    z-index: 10;
+    padding: 24px 40px 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: var(--title);
+    font-size: 20px;
+    letter-spacing: 4px;
+    color: var(--text-bright);
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  .section-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gold-dim);
+    letter-spacing: 2px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--deep);
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background 0.2s;
+    animation: card-in 0.4s ease both;
+  }
+
+  .card:hover {
+    background: var(--panel);
+  }
+
+  .card:hover .card-bar { transform: scaleX(1); }
+  .card:hover .card-num { color: var(--gold); }
+
+  .card-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .card-accent {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, transparent, rgba(200,168,75,0.2), transparent);
+  }
+
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .card-num {
+    font-family: var(--title);
+    font-size: 32px;
+    line-height: 1;
+    color: var(--border);
+    min-width: 44px;
+    transition: color 0.2s;
+    user-select: none;
+  }
+
+  .card-body { flex: 1; }
+
+  .card-name {
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    color: var(--text-bright);
+    line-height: 1.3;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    padding: 2px 7px;
+    border: 1px solid;
+    text-transform: uppercase;
+  }
+
+  .tag-gold {
+    border-color: var(--gold-dim);
+    color: var(--gold);
+    background: rgba(200,168,75,0.07);
+  }
+
+  .tag-blue {
+    border-color: rgba(52,152,219,0.3);
+    color: #5dade2;
+    background: rgba(52,152,219,0.07);
+  }
+
+  .tag-green {
+    border-color: rgba(39,174,96,0.3);
+    color: #58d68d;
+    background: rgba(39,174,96,0.07);
+  }
+
+  .card-footer {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--green);
+  }
+
+  .status-dot::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  .card-id {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--border);
+    letter-spacing: 1px;
+  }
+
+  /* Highlight */
+  .card.highlight .card-bar { transform: scaleX(1); background: var(--gold-bright); }
+  .card.highlight { background: rgba(200,168,75,0.04); }
+
+  /* No results */
+  .no-results {
+    grid-column: 1 / -1;
+    padding: 60px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--gold-dim);
+  }
+
+  /* ── Footer ── */
+  footer {
+    position: relative;
+    z-index: 10;
+    border-top: 1px solid var(--border);
+    padding: 16px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-text {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--gold-dim);
+  }
+
+  .progress-bar {
+    width: 200px;
+    height: 2px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    transition: width 0.5s ease;
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 6px;
+    height: 6px;
+    background: var(--gold-bright);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--gold-bright);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+
+  @media (max-width: 600px) {
+    header { padding: 20px; flex-direction: column; align-items: flex-start; gap: 16px; }
+    .controls { padding: 12px 20px; }
+    .main { padding: 16px 20px 32px; }
+    footer { padding: 12px 20px; }
+    .stats-bar { flex-wrap: wrap; }
+    .stat { min-width: 50%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="shield-icon">▣ SECURITY CORP REGISTRY ▣</span>
+    <h1>CÔNG TY <span>BẢO VỆ</span></h1>
+    <div class="subtitle">Hệ thống giám sát — Việt Nam</div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge"><span class="live-dot"></span>LIVE FEED</div>
+    <div class="clock" id="clock">--:--:--</div>
+    <div class="date-display" id="date-display">--/--/----</div>
+  </div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-label">Tổng số</div>
+    <div class="stat-value" id="stat-total">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Đang hiển thị</div>
+    <div class="stat-value green" id="stat-visible">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Cập nhật lần cuối</div>
+    <div class="stat-value" style="font-size:16px;padding-top:6px" id="stat-updated">--:--:--</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Trạng thái</div>
+    <div class="stat-value green" style="font-size:18px;padding-top:6px">ACTIVE</div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="search-box">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="search" placeholder="TÌM KIẾM CÔNG TY..." oninput="filterCards()">
+  </div>
+  <span class="sort-label">SẮP XẾP:</span>
+  <button class="btn active" id="btn-num" onclick="sortBy('num')">SỐ THỨ TỰ</button>
+  <button class="btn" id="btn-az" onclick="sortBy('az')">A → Z</button>
+  <button class="btn" id="btn-za" onclick="sortBy('za')">Z → A</button>
+  <div class="speed-control">
+    <span class="speed-label">TỐC ĐỘ TICKER:</span>
+    <input type="range" min="20" max="120" value="60" oninput="setTickerSpeed(this.value)">
+  </div>
+</div>
+
+<div class="ticker-wrap">
+  <div class="ticker-track" id="ticker"></div>
+</div>
+
+<div class="main">
+  <div class="section-header">
+    <div class="section-title">DANH SÁCH ĐĂNG KÝ</div>
+    <div class="section-line"></div>
+    <div class="section-count" id="section-count">-- ĐƠN VỊ</div>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<footer>
+  <div class="footer-text" id="footer-refresh">CẬP NHẬT TỰ ĐỘNG MỖI 5 GIÂY</div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress" style="width:0%"></div>
+  </div>
+  <div class="footer-text">© HỆ THỐNG ĐĂNG KÝ BẢO VỆ VN</div>
+</footer>
+
+<script>
+const companies = [
+  { name: "Công ty TNHH Bảo Vệ Việt Long", city: "Hà Nội", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ An Ninh Thủ Đô", city: "Hà Nội", type: "An ninh", level: "A+" },
+  { name: "Công ty TNHH Bảo Vệ Hoàng Long", city: "TP.HCM", type: "Bảo vệ sự kiện", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Toàn Cầu Việt", city: "Đà Nẵng", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty CP Bảo Vệ An Toàn Xanh", city: "TP.HCM", type: "An ninh", level: "A+" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Long Sơn", city: "Cần Thơ", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Bảo Vệ Đại Dương", city: "Hải Phòng", type: "Bảo vệ cảng", level: "A" },
+  { name: "Công ty TNHH An Ninh Phương Nam", city: "TP.HCM", type: "An ninh", level: "A" },
+  { name: "Công ty CP Bảo Vệ Thần Long", city: "Hà Nội", type: "Bảo vệ VIP", level: "A+" },
+  { name: "Công ty TNHH Bảo Vệ Miền Bắc", city: "Hà Nội", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Đông Nam Á", city: "TP.HCM", type: "An ninh", level: "A+" },
+  { name: "Công ty TNHH Bảo Vệ Kim Long", city: "Huế", type: "Bảo vệ KCN", level: "B" },
+  { name: "Công ty CP An Ninh Quốc Tế Sài Gòn", city: "TP.HCM", type: "An ninh", level: "A+" },
+  { name: "Công ty TNHH Bảo Vệ Phú Sĩ Việt Nam", city: "Bình Dương", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty CP Bảo Vệ Tân Định", city: "TP.HCM", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH An Ninh Tây Nguyên", city: "Đắk Lắk", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Bảo Vệ Bình Minh", city: "Hà Nội", type: "Bảo vệ sự kiện", level: "A" },
+  { name: "Công ty TNHH Dịch Vụ An Ninh Mekong", city: "Cần Thơ", type: "An ninh", level: "A" },
+  { name: "Công ty CP Bảo Vệ Thái Dương", city: "Đà Nẵng", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty TNHH Bảo Vệ Nhật Nam", city: "TP.HCM", type: "Bảo vệ KCN", level: "A+" },
+  { name: "Công ty CP An Ninh Thành Đô", city: "Hà Nội", type: "An ninh", level: "A" },
+  { name: "Công ty TNHH Bảo Vệ Thiên Phúc", city: "TP.HCM", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Bảo Vệ Hùng Vương", city: "Phú Thọ", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Nam Á", city: "TP.HCM", type: "An ninh", level: "A" },
+  { name: "Công ty CP An Ninh Long Thành", city: "Đồng Nai", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty TNHH Bảo Vệ Việt Mỹ", city: "Hà Nội", type: "An ninh", level: "A+" },
+  { name: "Công ty CP Bảo Vệ Biển Đông", city: "Đà Nẵng", type: "Bảo vệ cảng", level: "A" },
+  { name: "Công ty TNHH An Ninh Tây Nam Bộ", city: "Cần Thơ", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Bảo Vệ Trường Thành", city: "Hà Nội", type: "Bảo vệ VIP", level: "A+" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Minh Châu", city: "Hải Phòng", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP An Ninh Đồng Tháp", city: "Đồng Tháp", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Kiên Giang", city: "Kiên Giang", type: "Bảo vệ cảng", level: "B" },
+  { name: "Công ty CP Dịch Vụ An Ninh Thái Bình", city: "Thái Bình", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Phú Quốc", city: "Kiên Giang", type: "An ninh", level: "A" },
+  { name: "Công ty CP Bảo Vệ Tầm Nhìn Việt", city: "TP.HCM", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty TNHH An Ninh Hoàn Kiếm", city: "Hà Nội", type: "Bảo vệ sự kiện", level: "A" },
+  { name: "Công ty CP Bảo Vệ Hải Dương", city: "Hải Dương", type: "Bảo vệ KCN", level: "B" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Nam Long", city: "Đồng Nai", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty CP An Ninh Quảng Nam", city: "Quảng Nam", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Tân Sơn Nhất", city: "TP.HCM", type: "Bảo vệ sân bay", level: "A+" },
+  { name: "Công ty CP Bảo Vệ Đà Lạt", city: "Lâm Đồng", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH An Ninh Sông Hồng", city: "Hà Nội", type: "An ninh", level: "A" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Quảng Bình", city: "Quảng Bình", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Tiền Giang", city: "Tiền Giang", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP An Ninh Khánh Hòa", city: "Khánh Hòa", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty TNHH Bảo Vệ Ninh Thuận", city: "Ninh Thuận", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Dịch Vụ An Ninh Bắc Giang", city: "Bắc Giang", type: "Bảo vệ KCN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Bình Định", city: "Bình Định", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP An Ninh Vĩnh Phúc", city: "Vĩnh Phúc", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Quảng Ngãi", city: "Quảng Ngãi", type: "Bảo vệ KCN", level: "B" },
+  { name: "Công ty CP Bảo Vệ Đông Đô", city: "Hà Nội", type: "Bảo vệ VIP", level: "A+" },
+  { name: "Công ty TNHH An Ninh Bắc Ninh", city: "Bắc Ninh", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Lào Cai", city: "Lào Cai", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Việt Thắng", city: "TP.HCM", type: "An ninh", level: "A" },
+  { name: "Công ty CP An Ninh Thừa Thiên Huế", city: "Huế", type: "Bảo vệ sự kiện", level: "A" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Quảng Trị", city: "Quảng Trị", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Bảo Vệ Ngôi Sao Việt", city: "Hà Nội", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty TNHH An Ninh Gia Lai", city: "Gia Lai", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Kontum", city: "Kon Tum", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Toàn Thắng", city: "TP.HCM", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty CP An Ninh Đồng Nai", city: "Đồng Nai", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Long An", city: "Long An", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Bảo Vệ Bến Tre", city: "Bến Tre", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH An Ninh Vũng Tàu", city: "Bà Rịa-VT", type: "Bảo vệ cảng", level: "A" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Trà Vinh", city: "Trà Vinh", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Sóc Trăng", city: "Sóc Trăng", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP An Ninh Bạc Liêu", city: "Bạc Liêu", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Cà Mau", city: "Cà Mau", type: "Bảo vệ cảng", level: "B" },
+  { name: "Công ty CP Bảo Vệ An Giang", city: "An Giang", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH An Ninh Vĩnh Long", city: "Vĩnh Long", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Hậu Giang", city: "Hậu Giang", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Quốc Thịnh", city: "Hà Nội", type: "An ninh", level: "A+" },
+  { name: "Công ty CP An Ninh Thăng Long", city: "Hà Nội", type: "Bảo vệ VIP", level: "A+" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Việt Cường", city: "TP.HCM", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty CP Bảo Vệ Liên Minh Châu Á", city: "TP.HCM", type: "An ninh", level: "A+" },
+  { name: "Công ty TNHH An Ninh Tân Bình", city: "TP.HCM", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Bình Phước", city: "Bình Phước", type: "Bảo vệ KCN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Bình Thuận", city: "Bình Thuận", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP An Ninh Đắk Nông", city: "Đắk Nông", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Lâm Đồng", city: "Lâm Đồng", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Bảo Vệ Phú Yên", city: "Phú Yên", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH An Ninh Quảng Ninh", city: "Quảng Ninh", type: "Bảo vệ cảng", level: "A" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Nghệ An", city: "Nghệ An", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty TNHH Bảo Vệ Hà Tĩnh", city: "Hà Tĩnh", type: "Bảo vệ KCN", level: "B" },
+  { name: "Công ty CP An Ninh Nam Định", city: "Nam Định", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Ninh Bình", city: "Ninh Bình", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Bảo Vệ Thanh Hóa", city: "Thanh Hóa", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty TNHH An Ninh Hà Nam", city: "Hà Nam", type: "Bảo vệ KCN", level: "B" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Hòa Bình", city: "Hòa Bình", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Yên Bái", city: "Yên Bái", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP An Ninh Điện Biên", city: "Điện Biên", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Sơn La", city: "Sơn La", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Bảo Vệ Tuyên Quang", city: "Tuyên Quang", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH An Ninh Phú Thọ", city: "Phú Thọ", type: "Bảo vệ KCN", level: "B" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Thái Nguyên", city: "Thái Nguyên", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty TNHH Bảo Vệ Hà Giang", city: "Hà Giang", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP An Ninh Bắc Kạn", city: "Bắc Kạn", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Cao Bằng", city: "Cao Bằng", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty CP Bảo Vệ Lạng Sơn", city: "Lạng Sơn", type: "Bảo vệ cửa khẩu", level: "A" },
+  { name: "Công ty TNHH An Ninh Quảng Bình Xanh", city: "Quảng Bình", type: "An ninh", level: "A" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Lai Châu", city: "Lai Châu", type: "Bảo vệ DN", level: "B" },
+  { name: "Công ty TNHH Bảo Vệ Hưng Yên", city: "Hưng Yên", type: "Bảo vệ KCN", level: "B" },
+  { name: "Công ty CP An Ninh Bắc Giang Xanh", city: "Bắc Giang", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Quảng Ninh Hải", city: "Quảng Ninh", type: "Bảo vệ cảng", level: "A+" },
+  { name: "Công ty CP Bảo Vệ Thành Công Việt", city: "Hà Nội", type: "An ninh", level: "A+" },
+  { name: "Công ty TNHH An Ninh Sài Gòn Star", city: "TP.HCM", type: "Bảo vệ sự kiện", level: "A+" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Đông Phương", city: "Hà Nội", type: "Bảo vệ VIP", level: "A" },
+  { name: "Công ty TNHH Bảo Vệ Ngọc Việt", city: "TP.HCM", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty CP An Ninh Vạn Phúc", city: "Hà Nội", type: "An ninh", level: "A" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Thiên Long", city: "TP.HCM", type: "Bảo vệ sự kiện", level: "A" },
+  { name: "Công ty CP Bảo Vệ Phượng Hoàng", city: "Đà Nẵng", type: "An ninh", level: "A+" },
+  { name: "Công ty TNHH An Ninh Quang Trung", city: "Hà Nội", type: "Bảo vệ VIP", level: "A" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Sao Việt", city: "TP.HCM", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty TNHH Bảo Vệ Tân Thế Kỷ", city: "Hà Nội", type: "An ninh", level: "A+" },
+  { name: "Công ty CP An Ninh Bảo Long", city: "TP.HCM", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Đại Việt", city: "Hà Nội", type: "Bảo vệ sự kiện", level: "A" },
+  { name: "Công ty CP Bảo Vệ Minh Quân", city: "TP.HCM", type: "Bảo vệ VIP", level: "A+" },
+  { name: "Công ty TNHH An Ninh Tân Phú", city: "TP.HCM", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Hoàng Gia Việt", city: "Hà Nội", type: "An ninh", level: "A+" },
+  { name: "Công ty TNHH Bảo Vệ Quốc Hùng", city: "Đà Nẵng", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty CP An Ninh Duyên Hải", city: "Hải Phòng", type: "Bảo vệ cảng", level: "A+" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Tinh Anh", city: "TP.HCM", type: "An ninh", level: "A" },
+  { name: "Công ty CP Bảo Vệ Đất Việt", city: "Hà Nội", type: "Bảo vệ KCN", level: "A" },
+  { name: "Công ty TNHH An Ninh Bình Dương Star", city: "Bình Dương", type: "Bảo vệ KCN", level: "A+" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Nam Tiến", city: "TP.HCM", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty TNHH Bảo Vệ Trung Nam", city: "Đà Nẵng", type: "An ninh", level: "A" },
+  { name: "Công ty CP An Ninh Hà Thành", city: "Hà Nội", type: "Bảo vệ sự kiện", level: "A+" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Vạn An", city: "TP.HCM", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty CP Bảo Vệ Long Hải", city: "Bà Rịa-VT", type: "Bảo vệ cảng", level: "A" },
+  { name: "Công ty TNHH An Ninh Cửu Long", city: "Cần Thơ", type: "An ninh", level: "A+" },
+  { name: "Công ty CP Dịch Vụ Bảo Vệ Tây Sơn", city: "Bình Định", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty TNHH Bảo Vệ Đông Phú", city: "Hà Nội", type: "Bảo vệ VIP", level: "A+" },
+  { name: "Công ty CP An Ninh Mặt Trời Mọc", city: "TP.HCM", type: "Bảo vệ DN", level: "A" },
+  { name: "Công ty TNHH Dịch Vụ Bảo Vệ Khải Minh", city: "Đà Nẵng", type: "An ninh", level: "A" },
+];
+
+// Tags colors mapping
+function tagClass(type) {
+  if (type.includes("VIP") || type.includes("sân bay")) return "tag-gold";
+  if (type.includes("KCN") || type.includes("cảng") || type.includes("cửa khẩu")) return "tag-blue";
+  return "tag-green";
+}
+
+function levelClass(level) {
+  if (level === "A+") return "tag-gold";
+  if (level === "A") return "tag-blue";
+  return "tag-green";
+}
+
+let currentSort = 'num';
+let searchTerm = '';
+let displayedCount = 0;
+let intervalId;
+let refreshCountdown = 5;
+
+function getFiltered() {
+  let list = companies.map((c, i) => ({ ...c, originalIndex: i }));
+  if (searchTerm) {
+    list = list.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.city.toLowerCase().includes(searchTerm.toLowerCase()));
+  }
+  if (currentSort === 'az') list.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+  else if (currentSort === 'za') list.sort((a, b) => b.name.localeCompare(a.name, 'vi'));
+  return list;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  const filtered = getFiltered();
+  grid.innerHTML = '';
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="no-results">[ KHÔNG TÌM THẤY KẾT QUẢ ]</div>';
+    document.getElementById('stat-visible').textContent = '0';
+    document.getElementById('section-count').textContent = '0 ĐƠN VỊ';
+    return;
+  }
+
+  document.getElementById('stat-visible').textContent = filtered.length;
+  document.getElementById('section-count').textContent = filtered.length + ' ĐƠN VỊ';
+
+  filtered.forEach((c, idx) => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.style.animationDelay = Math.min(idx * 20, 500) + 'ms';
+    const num = String(c.originalIndex + 1).padStart(3, '0');
+    div.innerHTML = `
+      <div class="card-bar"></div>
+      <div class="card-accent"></div>
+      <div class="card-inner">
+        <div class="card-num">${num}</div>
+        <div class="card-body">
+          <div class="card-name">${c.name}</div>
+          <div class="card-meta">
+            <span class="tag tag-blue">${c.city}</span>
+            <span class="tag ${tagClass(c.type)}">${c.type}</span>
+            <span class="tag ${levelClass(c.level)}">Hạng ${c.level}</span>
+          </div>
+          <div class="card-footer">
+            <span class="status-dot">HOẠT ĐỘNG</span>
+            <span class="card-id">BV-${String(c.originalIndex + 100).padStart(4, '0')}</span>
+          </div>
+        </div>
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+
+function buildTicker() {
+  const ticker = document.getElementById('ticker');
+  const doubled = [...companies, ...companies];
+  ticker.innerHTML = doubled.map(c =>
+    `<span class="ticker-item"><span class="dot"></span>${c.name} — ${c.city}</span>`
+  ).join('');
+}
+
+function setTickerSpeed(val) {
+  const track = document.getElementById('ticker');
+  track.style.animationDuration = val + 's';
+}
+
+function sortBy(type) {
+  currentSort = type;
+  ['num','az','za'].forEach(t => {
+    document.getElementById('btn-'+t).classList.toggle('active', t === type);
+  });
+  renderGrid();
+}
+
+function filterCards() {
+  searchTerm = document.getElementById('search').value;
+  renderGrid();
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('vi-VN', { hour12: false });
+  document.getElementById('date-display').textContent =
+    now.toLocaleDateString('vi-VN');
+  document.getElementById('stat-updated').textContent =
+    now.toLocaleTimeString('vi-VN', { hour12: false });
+}
+
+function updateProgress() {
+  refreshCountdown--;
+  if (refreshCountdown < 0) refreshCountdown = 5;
+  const pct = ((5 - refreshCountdown) / 5) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+  if (refreshCountdown === 0) {
+    // Simulate live refresh — shuffle slight variations
+    renderGrid();
+  }
+}
+
+// Init
+document.getElementById('stat-total').textContent = companies.length;
+buildTicker();
+renderGrid();
+updateClock();
+setInterval(updateClock, 1000);
+setInterval(updateProgress, 1000);
+</script>
+</body>
+</html>
