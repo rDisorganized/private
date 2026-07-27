@@ -3,100 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Không Tìm Thấy Trang | Pro Max</title>
+    <title>404 - Không Tìm Thấy Trang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
         :root {
-            --bg-color: #0a0a0c;
-            --text-color: #ffffff;
-            --accent-color: #0071e3; /* Xanh Apple Pro */
-            --sub-text: #86868b;
+            --neon: #00ff9d;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        .title-font {
+            font-family: 'Space Grotesk', sans-serif;
         }
 
-        .container {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .code {
-            font-size: 15vw;
-            font-weight: 700;
-            line-height: 1;
-            margin: 0;
-            background: linear-gradient(90deg, #4da3ff, #ffffff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: fadeIn 1s ease-in-out;
-        }
-
-        .message {
-            font-size: 24px;
-            font-weight: 600;
-            margin-top: -10px;
-            margin-bottom: 20px;
-            color: var(--text-color);
-            opacity: 0;
-            animation: slideUp 1s ease-out 0.5s forwards;
-        }
-
-        .description {
-            color: var(--sub-text);
-            font-size: 18px;
-            max-width: 500px;
-            margin: 0 auto 40px;
-            opacity: 0;
-            animation: slideUp 1s ease-out 0.7s forwards;
-        }
-
-        .button {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: var(--accent-color);
+        .glitch {
+            position: relative;
             color: white;
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            opacity: 0;
-            animation: slideUp 1s ease-out 0.9s forwards;
+            font-size: 9rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            animation: glitch 2s infinite;
         }
 
-        .button:hover {
-            background-color: #0077ed;
-            transform: scale(1.05);
-            box-shadow: 0 10px 20px rgba(0, 113, 227, 0.3);
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 3px); }
+            40% { transform: translate(-3px, -3px); }
+            60% { transform: translate(3px, 3px); }
+            80% { transform: translate(3px, -3px); }
+            100% { transform: translate(0); }
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(0, 255, 157, 0.08) 50%
+            );
+            background-size: 100% 6px;
+            pointer-events: none;
+            animation: scan 4s linear infinite;
+            z-index: 1;
+            opacity: 0.6;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .incognito-hat {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .neon-text {
+            text-shadow: 
+                0 0 10px var(--neon),
+                0 0 20px var(--neon),
+                0 0 40px var(--neon);
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1 class="code">404</h1>
-        <h2 class="message">Oops! Trang không tồn tại.</h2>
-        <p class="description">Có vẻ như đường dẫn bạn truy cập đã bị di chuyển hoặc không còn tồn tại. Hãy quay về trang chủ nhé.</p>
-        <a href="/" class="button">Về Trang Chủ</a>
+<body class="bg-zinc-950 text-white overflow-hidden min-h-screen flex items-center justify-center relative">
+    <!-- Background effects -->
+    <div class="absolute inset-0 bg-[radial-gradient(at_center,#00ff9d10_0%,transparent_70%)]"></div>
+    <div class="absolute inset-0 bg-grid opacity-10"></div>
+
+    <div class="relative z-10 max-w-2xl mx-auto text-center px-6">
+        <!-- Incognito Icon -->
+        <div class="flex justify-center mb-8">
+            <div class="relative incognito-hat">
+                <svg width="140" height="140" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Hat -->
+                    <path d="M35 65 Q70 30 105 65" stroke="#00ff9d" stroke-width="18" stroke-linecap="round"/>
+                    <path d="M25 70 Q70 45 115 70" fill="#111827" stroke="#00ff9d" stroke-width="12"/>
+                    <!-- Glasses -->
+                    <circle cx="55" cy="85" r="18" fill="none" stroke="#00ff9d" stroke-width="10"/>
+                    <circle cx="85" cy="85" r="18" fill="none" stroke="#00ff9d" stroke-width="10"/>
+                    <line x1="73" y1="85" x2="67" y2="85" stroke="#00ff9d" stroke-width="8"/>
+                    <!-- Eyebrows -->
+                    <path d="M42 68 Q55 60 68 68" fill="none" stroke="#00ff9d" stroke-width="6" stroke-linecap="round"/>
+                    <path d="M72 68 Q85 60 98 68" fill="none" stroke="#00ff9d" stroke-width="6" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 404 -->
+        <h1 class="glitch title-font mb-2">404</h1>
+        
+        <div class="scanline"></div>
+
+        <p class="text-3xl md:text-5xl font-semibold tracking-tight neon-text mb-4">
+            TRANG ĐÃ BIẾN MẤT
+        </p>
+        
+        <p class="text-zinc-400 text-lg md:text-xl max-w-md mx-auto">
+            Dù bạn đang ở chế độ ẩn danh, trang này vẫn không thể tìm thấy.<br>
+            Có lẽ nó cũng đang đi lang thang trong chế độ riêng tư.
+        </p>
+
+        <!-- Action buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mt-12">
+            <a href="/" 
+               class="group px-8 py-5 bg-white text-zinc-900 rounded-2xl font-semibold flex items-center justify-center gap-3 hover:scale-105 transition-all duration-300">
+                <i class="fa-solid fa-house"></i>
+                <span>Về Trang Chủ</span>
+            </a>
+            
+            <button onclick="window.history.back()" 
+                    class="group px-8 py-5 border border-white/30 hover:border-white/60 rounded-2xl font-medium flex items-center justify-center gap-3 transition-all duration-300">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Quay Lại</span>
+            </button>
+        </div>
+
+        <!-- Fun footer -->
+        <div class="mt-16 text-zinc-500 text-sm flex items-center justify-center gap-6">
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                <span>Incognito Mode</span>
+            </div>
+            <div>•</div>
+            <div>Không có dấu vết nào được lưu</div>
+        </div>
     </div>
+
+    <!-- Particles / subtle dots -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-1/4 left-1/4 w-1 h-1 bg-emerald-400 rounded-full animate-ping opacity-30"></div>
+        <div class="absolute top-1/3 right-1/3 w-1 h-1 bg-emerald-400 rounded-full animate-ping opacity-20 delay-300"></div>
+        <div class="absolute bottom-1/4 left-1/3 w-1 h-1 bg-emerald-400 rounded-full animate-ping opacity-40 delay-700"></div>
+    </div>
+
+    <script>
+        // Tailwind script already included
+        console.log('%c404 Incognito Mode Activated 🕵️', 'color:#00ff9d; font-size:14px; font-family:monospace');
+    </script>
 </body>
 </html>
